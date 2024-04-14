@@ -45,9 +45,7 @@ namespace PBS_Image
 
         public static byte get_color(double color)
         {
-            if (color > 255) color = 255;
-            if (color < 0) color = 0;
-            return (byte)color;
+            return (byte)Math.Clamp(color, Pixel.min, Pixel.max);
 
         }
 
