@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PBS_Image
 {
-    internal class MyImage
+    class MyImage
     {
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
         public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
@@ -288,5 +288,97 @@ namespace PBS_Image
             filtered.image = Filter.filter(filtered.image, kernel, basic);
             return filtered;
         }
+
+
+        public enum Hideout
+        {
+            Red = 0b001,
+            Green = 0b010,
+            Blue = 0b100,
+            All = 0b111,
+            Nothing
+        }
+
+        public Pixel[,] GetHiddenImage(int n, byte hideout)
+        {
+            byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
+
+            bool red = (Bytes.GetLeastSignificantBits(lsb, 1) == 1);
+            bool green = (Bytes.GetLeastSignificantBits(((byte)(lsb >> 1)), 1) == 1);
+            bool blue = (Bytes.GetLeastSignificantBits(((byte)(lsb >> 2)), 1) == 1);
+
+            if (!red && !blue && !green)
+                throw new Exception("No channel selected");
+            else
+            {
+                Pixel[,] newImage = new Pixel[width, height];
+
+                for (int j = 0; j < height; j++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        byte newR = red ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].red, n), n) : (byte)0;
+                        byte newG = green ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].green, n), n) : (byte)0;
+                        byte newB = blue ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].blue, n), n) : (byte)0;
+
+                        if (!red && blue && green) newR = (byte)((newB + newG) / 2);
+                        else if (red && !blue && green) newB = (byte)((newR + newG) / 2);
+                        else if (red && blue && !green) newG = (byte)((newR + newB) / 2);
+                        else if (red && !blue && !green) newG = newB = newR;
+                        else if (!red && green && !blue) newR = newB = newG;
+                        else if (!red && !green && blue) newR = newG = newB;
+
+                        Pixel newPixel = new Pixel(newR, newG, newB);
+                        newImage[i, j] = newPixel;
+                    }
+                }
+
+                return newImage;
+            }
+        }
+
+        public void HideImage(int n, byte hideout, MyImage toHide)
+        {
+            if (hideout == 0)
+            {
+                throw new Exception("No channel selected");
+            }
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    (byte R, byte G, byte B) toHidePixels = (toHide.image[j, i].red, toHide.image[j, i].green, toHide.image[j, i].blue);
+                    Pixel myPixel = new Pixel(image[j, i].red, image[j, i].green, image[j, i].blue);
+
+                    byte compressed;
+                    // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
+                    if ((hideout & (byte)Hideout.Red) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.R, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.red, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Green) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.G, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.green, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Blue) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.B, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.blue, compressed, n);
+                    }
+
+                    image[j, i] = myPixel;
+                }
+            }
+        }
     }
+
+
+
+
+
 }
