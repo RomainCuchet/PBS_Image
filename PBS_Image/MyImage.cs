@@ -8,6 +8,7 @@ namespace PBS_Image
 {
     class MyImage
     {
+        #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
         public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
                         BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
@@ -36,7 +37,9 @@ namespace PBS_Image
         public int p_red; // palette red
         public int p_r; // palette réservé
         public Pixel[,] image;
+        #endregion
 
+        #region constructors
         /// <summary>
         /// constructor by copy
         /// </summary>
@@ -72,6 +75,7 @@ namespace PBS_Image
             }
         }
 
+
         public MyImage(string file_name, string folder = "../../../Images/")
         {
             byte[] data = File.ReadAllBytes(folder + file_name);
@@ -80,10 +84,6 @@ namespace PBS_Image
             get_image(data);
         }
 
-        /// <summary>
-        /// permet d'obtenir les métadatas d'une image au format bitmap
-        /// </summary>
-        /// <param name="data">les bits de l'image</param>
         public void get_meta(byte[] data)
         {
             // les 14 premies bytes constituent l'entête
@@ -102,19 +102,12 @@ namespace PBS_Image
             vert_res = Tools.BytesToInt(Tools.get_bytes_from(data, 42, 45)); ;
             nb_color = Tools.BytesToInt(Tools.get_bytes_from(data, 46, 49)); ;
             nb_color_imp = Tools.BytesToInt(Tools.get_bytes_from(data, 50, 53));
-            if (offset == 58) // La palette est optionelle
-            {
-                p_blue = Tools.BytesToInt(new byte[] { data[54] });
-                p_green = Tools.BytesToInt(new byte[] { data[55] });
-                p_red = Tools.BytesToInt(new byte[] { data[56] });
-                p_r = Tools.BytesToInt(new byte[] { data[57] });
-            }
         }
         /// <summary>
-        /// get a pixel matrix to represent the image
+        /// get a pixel matrix to represent the image, only works without palette and remplissage when nb_bits_image = height*width*3
         /// </summary>
         /// <param name="data">array of bytes</param>
-        public void get_image(byte[] data)
+        public void get_image_basic(byte[] data)
         {
             int i = 0;
             int j = 0;
@@ -127,6 +120,7 @@ namespace PBS_Image
                     j++;
                     if (j % width == 0)
                     {
+                        Console.WriteLine(j);
                         i++;
                         j = 0;
                     }
@@ -134,52 +128,40 @@ namespace PBS_Image
             }
 
         }
-        /// <summary>
-        /// Print the pixels of the image, too long too be aplied to big images 
-        /// </summary>
-        /// <returns></returns>
-        public string ImageToString()
+
+        public void get_image(byte[] data)
         {
-            if (image == null) return "vide";
-            string str = "";
-            for (int i = 0; i < image.GetLength(0); i++)
+            int i = 0;
+            int j = 0;
+            int nb_bits_pixel = nb_bits_color / 8;
+
+            if (nb_bits_color == 24)
             {
-                for (int j = 0; j < image.GetLength(1); j++)
+                int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
+                int dataIndex = offset;
+
+                for (int y = 0; y < height; y++) 
                 {
-                    str += image[i, j].Tostring() + " ";
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte blue = data[dataIndex++];
+                        byte green = data[dataIndex++];
+                        byte red = data[dataIndex++];
+                        image[i, j] = new Pixel(red, green, blue);
+                        j++;
+                    }
+
+                    // Aller au début de la prochaine ligne, en sautant les octets de remplissage
+                    dataIndex += (bytesPerRow - (width * nb_bits_pixel));
+                    j = 0;
+                    i++;
                 }
             }
-            return str;
         }
-        public string Tostring()
-        {
-            string str = $"Image {type}\n" +
-                $"taille_fichier : {taille_fichier}\n" +
-                $"taille entête : {taille_entete}\n" +
-                $"Offset : {offset}\n" +
-                $"width : {width}\n" +
-                $"height :{height}\n" +
-                $"id_ap :{id_ap}\n" +
-                $"nombre de plans  : {nb_plans}\n" +
-                $"nombre de bits par couleur : {nb_bits_color}\n" +
-                $"Format de compression : {comp_format}\n" +
-                $"Taille image : {taille_image}\n" +
-                $"Résolution horizontale : {hor_res}\n" +
-                $"Résolution verticale : {vert_res}\n" +
-                $"nombre de couleur : {nb_color}\n" +
-                $"nombre de couleurs importantes : {nb_color_imp}\n" +
-                $"nombre de couleurs : {nb_color}\n" +
-                $"nombre de couleurs importantes : {nb_color_imp}\n";
-            if (offset == 58)
-            {
-                str += $"Palette bleue : {p_blue}\n" +
-                    $"Palette vert : {p_green}\n" +
-                    $"Palette rouge : {p_red}\n" +
-                    $"Palette réservé : {p_r}\n";
-            }
-            else str += "La palette n'est pas définie";
-            return str;
-        }
+
+
+
+
         /// <summary>
         /// useful if we need to implement other formats
         /// </summary>
@@ -194,27 +176,6 @@ namespace PBS_Image
         {
             if (type == "BM") return 19778;
             return 0;
-        }
-
-        /// <summary>
-        /// save MyImage to a file
-        /// </summary>
-        /// <param name="folder">the destination folder</param>
-        /// <param name="file_name">the name of the desstination file</param>
-        /// <param name="random_name">wether to generate a new name or not</param>
-        public void Save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
-        {
-
-            List<byte> bytes = Get_Bytes_bmp();
-            if (random_name) file_name = folder + file_name + Tools.get_counter();
-            else file_name = folder + file_name;
-            file_name += get_type();
-            using (var fileStream = new FileStream(file_name, FileMode.Create))
-            using (var binaryWriter = new BinaryWriter(fileStream))
-            {
-                // Écrivez les octets dans le fichier
-                binaryWriter.Write(bytes.ToArray());
-            }
         }
 
         /// <summary>
@@ -239,14 +200,13 @@ namespace PBS_Image
             save_var_byte(vert_res);
             save_var_byte(nb_color);
             save_var_byte(nb_color_imp);
-            if (offset == 58)
+            if (offset > 54)
             {
-                save_var_byte(p_blue, 1);
-                save_var_byte(p_green, 1);
-                save_var_byte(p_red, 1);
-                save_var_byte(p_r, 1);
+                for(int i = 0; i < offset; i++)
+                {
+                    bytes.Add(0);
+                }
             }
-
             foreach (Pixel p in image)
             {
                 foreach (byte b in p.toByte())
@@ -263,6 +223,80 @@ namespace PBS_Image
             }
             return bytes;
         }
+        #endregion
+
+        #region affichage
+        public string imageTostring()
+        {
+            if (image == null) return "vide";
+            string str = "";
+            for (int i = 0; i < image.GetLength(0); i++)
+            {
+                for (int j = 0; j < image.GetLength(1); j++)
+                {
+                    str += image[i, j].Tostring() + " ";
+                }
+            }
+            return str;
+        }
+
+        public void display()
+        {
+            Console.WriteLine(Tostring());
+        }
+
+        public void display_image()
+        {
+            Console.WriteLine(imageTostring());
+        }
+
+        public string Tostring()
+        {
+            string str = $"Image {type}\n" +
+                $"taille_fichier : {taille_fichier}\n" +
+                $"taille entête : {taille_entete}\n" +
+                $"Offset : {offset}\n" +
+                $"width : {width}\n" +
+                $"height :{height}\n" +
+                $"id_ap :{id_ap}\n" +
+                $"nombre de plans  : {nb_plans}\n" +
+                $"nombre de bits par couleur : {nb_bits_color}\n" +
+                $"Format de compression : {comp_format}\n" +
+                $"Taille image : {taille_image}\n" +
+                $"Résolution horizontale : {hor_res}\n" +
+                $"Résolution verticale : {vert_res}\n" +
+                $"nombre de couleur : {nb_color}\n" +
+                $"nombre de couleurs importantes : {nb_color_imp}\n" +
+                $"nombre de couleurs : {nb_color}\n" +
+                $"nombre de couleurs importantes : {nb_color_imp}\n";
+            return str;
+        }
+        #endregion
+
+
+
+        /// <summary>
+        /// save MyImage to a file
+        /// </summary>
+        /// <param name="folder">the destination folder</param>
+        /// <param name="file_name">the name of the desstination file</param>
+        /// <param name="random_name">wether to generate a new name or not</param>
+        public void Save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
+        {
+
+            List<byte> bytes = Get_Bytes_bmp();
+            if (random_name) file_name = folder + file_name + Tools.get_counter();
+            else file_name = folder + file_name;
+            file_name += get_type();
+            using (var fileStream = new FileStream(file_name, FileMode.Create))
+            using (var binaryWriter = new BinaryWriter(fileStream))
+            {
+                // Écrivez les octets dans le fichier
+                binaryWriter.Write(bytes.ToArray());
+            }
+        }
+
+        
 
         /// <summary>
         /// this function rotate the image by angle degrees 

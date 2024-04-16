@@ -11,7 +11,16 @@ namespace PBS_Image
     {
         static void Main(string[] args)
         {
-            Demo.demoTD_34();
+            //Demo.demoTD_34();
+        }
+
+        private static void test_save29()
+        {
+            MyImage image = new("ref_statue.bmp");
+            Tools.Header header = new("/Save/Save29.bmp");
+            //MyImage image2 = new MyImage("/Save/Save29.bmp");
+            image.display();
+            header.display();
         }
     }
 }

@@ -2,12 +2,133 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
     class Tools
     {
-        public static void PrintInfo(string folder = "../../Images/", string file_name = "Test.bmp", bool p_image = false)
+        public class Header
+        {
+            #region parameters
+            // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
+            public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
+                        BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
+                        BA indique qu'il s'agit d'un Bitmap OS/2.
+                        CI indique qu'il s'agit d'une icone couleur OS/2.
+                        CP indique qu'il s'agit d'un pointeur de couleur OS/2.
+                        IC indique qu'il s'agit d'une icone OS/2.
+                        PT indique qu'il s'agit d'un pointeur OS/2.*/
+            public int taille_fichier; //La taille totale du fichier en octets (codée sur 4 octets)
+            public int id_ap; // Un champ réservé pour le créteur de l'image (sur 4 octets)
+            public int offset; // L'offset de l'image (sur 4 octets), en français décalage, c'est-à-dire l'adresse relative du début des informations concernant l'image par rapport au début du fichier
+            public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
+            public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
+            public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
+            public int nb_plans; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
+            public int nb_bits_color; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
+            public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
+            public int taille_image; //(sur 4 octets)
+            public int hor_res; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
+            public int vert_res; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
+            public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
+            public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
+                                     // la palette est optionelle
+            public int p_blue; // palette blue
+            public int p_green; // palette green
+            public int p_red; // palette red
+            public int p_r; // palette réservé
+            public byte[] data;
+            #endregion
+
+            public void test_length_image()
+            {
+                Console.WriteLine(data.Length-offset-width*height*3);
+                Console.WriteLine(data.Length-offset);
+            }
+
+            public void get_meta(byte[] data)
+            {
+                this.data = data;
+                // les 14 premies bytes constituent l'entête
+                type = "" + Convert.ToChar(data[0]) + Convert.ToChar(data[1]); // obtention du type
+                taille_fichier = Tools.BytesToInt(Tools.get_bytes_from(data, 2, 5));
+                id_ap = Tools.BytesToInt(Tools.get_bytes_from(data, 6, 9));
+                offset = Tools.BytesToInt(Tools.get_bytes_from(data, 10, 13));
+                taille_entete = Tools.BytesToInt(Tools.get_bytes_from(data, 14, 17));
+                width = Tools.BytesToInt(Tools.get_bytes_from(data, 18, 21));
+                height = Tools.BytesToInt(Tools.get_bytes_from(data, 22, 25));
+                nb_plans = Tools.BytesToInt(Tools.get_bytes_from(data, 26, 27));
+                nb_bits_color = Tools.BytesToInt(Tools.get_bytes_from(data, 28, 29));
+                comp_format = Tools.BytesToInt(Tools.get_bytes_from(data, 30, 33));
+                taille_image = Tools.BytesToInt(Tools.get_bytes_from(data, 34, 37));
+                hor_res = Tools.BytesToInt(Tools.get_bytes_from(data, 38, 41));
+                vert_res = Tools.BytesToInt(Tools.get_bytes_from(data, 42, 45)); ;
+                nb_color = Tools.BytesToInt(Tools.get_bytes_from(data, 46, 49)); ;
+                nb_color_imp = Tools.BytesToInt(Tools.get_bytes_from(data, 50, 53));
+                if (offset == 58) // La palette est optionelle
+                {
+                    p_blue = Tools.BytesToInt(new byte[] { data[54] });
+                    p_green = Tools.BytesToInt(new byte[] { data[55] });
+                    p_red = Tools.BytesToInt(new byte[] { data[56] });
+                    p_r = Tools.BytesToInt(new byte[] { data[57] });
+                }
+            }
+
+            public void display_Header()
+            {
+                string res = "Header\n";
+                for(int i=0;i<offset;i++)
+                {
+                    res += data[i] + " ";
+                }
+                Console.WriteLine(res+"\n");
+            }
+
+            public Header(string file_name, string folder = "../../../Images/")
+            {
+                byte[] data = File.ReadAllBytes(folder + file_name);
+                get_meta(data);
+            }
+            public string Tostring()
+            {
+                string str = $"Image {type}\n" +
+                    $"taille_fichier : {taille_fichier}\n" +
+                    $"taille entête : {taille_entete}\n" +
+                    $"Offset : {offset}\n" +
+                    $"width : {width}\n" +
+                    $"height :{height}\n" +
+                    $"id_ap :{id_ap}\n" +
+                    $"nombre de plans  : {nb_plans}\n" +
+                    $"nombre de bits par couleur : {nb_bits_color}\n" +
+                    $"Format de compression : {comp_format}\n" +
+                    $"Taille image : {taille_image}\n" +
+                    $"Résolution horizontale : {hor_res}\n" +
+                    $"Résolution verticale : {vert_res}\n" +
+                    $"nombre de couleur : {nb_color}\n" +
+                    $"nombre de couleurs importantes : {nb_color_imp}\n" +
+                    $"nombre de couleurs : {nb_color}\n" +
+                    $"nombre de couleurs importantes : {nb_color_imp}\n";
+                if (offset == 58)
+                {
+                    str += $"Palette bleue : {p_blue}\n" +
+                        $"Palette vert : {p_green}\n" +
+                        $"Palette rouge : {p_red}\n" +
+                        $"Palette réservé : {p_r}\n";
+                }
+                else str += "La palette n'est pas définie";
+                return str;
+            }
+
+
+
+            public void display()
+            {
+                Console.WriteLine(Tostring());
+                Console.WriteLine();
+            }
+        }
+        public static void PrintInfo(string file_name = "Test.bmp", string folder = "../../../Images/", bool p_image = false)
         {
             // http://wxfrantz.free.fr/index.php?p=format-bmp
 

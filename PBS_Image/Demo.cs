@@ -12,7 +12,7 @@ namespace PBS_Image
     {
         public static void demoTD_34()
         {
-            MyImage image = new MyImage("coco.bmp");
+            MyImage image = new MyImage("ref_statue.bmp");
             image.rotate(15, true).resize(1.3).Save();
             image.filter("sharpness").Save();
         }
