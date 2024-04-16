@@ -24,12 +24,12 @@ namespace PBS_Image
         public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
         public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
         public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-        public int nb_plans=1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-        public int nb_bits_color=24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
+        public int nb_plans = 1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
+        public int nb_bits_color = 24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
         public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
         public int taille_image; //(sur 4 octets)
-        public int hor_res=11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-        public int vert_res=11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
+        public int hor_res = 11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
+        public int vert_res = 11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
         public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
         public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
         // la palette est optionelle
@@ -213,18 +213,18 @@ namespace PBS_Image
             if (image.GetLength(1) % 4 != 0)
             {
                 int new_length = image.GetLength(1) - image.GetLength(1) % 4;
-                Pixel[,] image2 = new Pixel[image.GetLength(0),new_length];
-                for(int i =0;i<image.GetLength(0); i++)
+                Pixel[,] image2 = new Pixel[image.GetLength(0), new_length];
+                for (int i = 0; i < image.GetLength(0); i++)
                 {
-                    for(int j = 0; j < new_length; j++)
+                    for (int j = 0; j < new_length; j++)
                     {
-                        image2[i,j] = image[i,j];
+                        image2[i, j] = image[i, j];
                     }
                 }
                 image = image2;
             }
         }
-        
+
         public void update_header()
         {
             height = image.GetLength(0);
@@ -353,7 +353,7 @@ namespace PBS_Image
         /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public Pixel[,] GetHiddenImage(int n, byte hideout)
+        public MyImage GetHiddenImage(int n, byte hideout)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
 
@@ -387,7 +387,7 @@ namespace PBS_Image
                     }
                 }
 
-                return newImage;
+                return new MyImage(newImage);
             }
         }
 
@@ -438,9 +438,4 @@ namespace PBS_Image
             }
         }
     }
-
-
-
-
-
 }
