@@ -289,7 +289,9 @@ namespace PBS_Image
             return filtered;
         }
 
-
+        /// <summary>
+        /// Enumération des channels sur lesquels on peut cacher une image, permet une meilleure lisibilité si besoin
+        /// </summary>
         public enum Hideout
         {
             Red = 0b001,
@@ -299,6 +301,13 @@ namespace PBS_Image
             Nothing
         }
 
+        /// <summary>
+        /// Get the hidden image from the current image
+        /// </summary>
+        /// <param name="n">Nombres de bits sur lesquels l'image a été encodée</param>
+        /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public Pixel[,] GetHiddenImage(int n, byte hideout)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
@@ -337,6 +346,14 @@ namespace PBS_Image
             }
         }
 
+
+        /// <summary>
+        /// Hide an image in another image
+        /// </summary>
+        /// <param name="n">nombre de bits dans lesquels l'image sera encodée</param>
+        /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
+        /// <param name="toHide">image à cacher</param>
+        /// <exception cref="Exception"></exception>
         public void HideImage(int n, byte hideout, MyImage toHide)
         {
             if (hideout == 0)
