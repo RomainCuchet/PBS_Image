@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
@@ -10,7 +12,7 @@ namespace PBS_Image
     {
         #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
-        public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
+        public string type = "BM";    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
                         BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
                         BA indique qu'il s'agit d'un Bitmap OS/2.
                         CI indique qu'il s'agit d'une icone couleur OS/2.
@@ -23,12 +25,12 @@ namespace PBS_Image
         public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
         public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
         public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-        public int nb_plans; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-        public int nb_bits_color; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
+        public int nb_plans = 1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
+        public int nb_bits_color = 24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
         public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
         public int taille_image; //(sur 4 octets)
-        public int hor_res; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-        public int vert_res; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
+        public int hor_res = 11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
+        public int vert_res = 11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
         public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
         public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
         // la palette est optionelle
@@ -73,6 +75,16 @@ namespace PBS_Image
                     image[i, j] = new Pixel(myimage.image[i, j]);
                 }
             }
+        }
+
+        public MyImage(Pixel[,] image)
+        {
+            this.image = image;
+            type = "BM";
+            offset = 54;
+            taille_entete = 40;
+            width = this.image.GetLength(1);
+            height = this.image.GetLength(0);
         }
 
 
@@ -176,6 +188,8 @@ namespace PBS_Image
         {
             if (type == "BM") return 19778;
             return 0;
+        }
+
         }
 
         /// <summary>
@@ -323,7 +337,9 @@ namespace PBS_Image
             return filtered;
         }
 
-
+        /// <summary>
+        /// Enumération des channels sur lesquels on peut cacher une image, permet une meilleure lisibilité si besoin
+        /// </summary>
         public enum Hideout
         {
             Red = 0b001,
@@ -333,7 +349,14 @@ namespace PBS_Image
             Nothing
         }
 
-        public Pixel[,] GetHiddenImage(int n, byte hideout)
+        /// <summary>
+        /// Get the hidden image from the current image
+        /// </summary>
+        /// <param name="n">Nombres de bits sur lesquels l'image a été encodée</param>
+        /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public MyImage GetHiddenImage(int n, byte hideout)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
 
@@ -367,10 +390,18 @@ namespace PBS_Image
                     }
                 }
 
-                return newImage;
+                return new MyImage(newImage);
             }
         }
 
+
+        /// <summary>
+        /// Hide an image in another image
+        /// </summary>
+        /// <param name="n">nombre de bits dans lesquels l'image sera encodée</param>
+        /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
+        /// <param name="toHide">image à cacher</param>
+        /// <exception cref="Exception"></exception>
         public void HideImage(int n, byte hideout, MyImage toHide)
         {
             if (hideout == 0)
@@ -410,9 +441,4 @@ namespace PBS_Image
             }
         }
     }
-
-
-
-
-
 }
