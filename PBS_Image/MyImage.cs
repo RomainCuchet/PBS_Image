@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
     class MyImage
     {
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
-        public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
+        public string type = "BM";    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
                         BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
                         BA indique qu'il s'agit d'un Bitmap OS/2.
                         CI indique qu'il s'agit d'une icone couleur OS/2.
@@ -22,12 +24,12 @@ namespace PBS_Image
         public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
         public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
         public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-        public int nb_plans; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-        public int nb_bits_color; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
+        public int nb_plans=1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
+        public int nb_bits_color=24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
         public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
         public int taille_image; //(sur 4 octets)
-        public int hor_res; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-        public int vert_res; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
+        public int hor_res=11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
+        public int vert_res=11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
         public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
         public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
         // la palette est optionelle
@@ -70,6 +72,16 @@ namespace PBS_Image
                     image[i, j] = new Pixel(myimage.image[i, j]);
                 }
             }
+        }
+
+        public MyImage(Pixel[,] image)
+        {
+            this.image = image;
+            type = "BM";
+            offset = 54;
+            taille_entete = 40;
+            width = this.image.GetLength(1);
+            height = this.image.GetLength(0);
         }
 
         public MyImage(string file_name, string folder = "../../../Images/")
@@ -196,25 +208,58 @@ namespace PBS_Image
             return 0;
         }
 
+        public void image_format_width()
+        {
+            if (image.GetLength(1) % 4 != 0)
+            {
+                int new_length = image.GetLength(1) - image.GetLength(1) % 4;
+                Pixel[,] image2 = new Pixel[image.GetLength(0),new_length];
+                for(int i =0;i<image.GetLength(0); i++)
+                {
+                    for(int j = 0; j < new_length; j++)
+                    {
+                        image2[i,j] = image[i,j];
+                    }
+                }
+                image = image2;
+            }
+        }
+        
+        public void update_header()
+        {
+            height = image.GetLength(0);
+            width = image.GetLength(1);
+            taille_fichier = offset + height * width * 3 + offset;
+        }
+
         /// <summary>
         /// save MyImage to a file
         /// </summary>
         /// <param name="folder">the destination folder</param>
         /// <param name="file_name">the name of the desstination file</param>
         /// <param name="random_name">wether to generate a new name or not</param>
-        public void Save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
+        public void save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
         {
-
-            List<byte> bytes = Get_Bytes_bmp();
-            if (random_name) file_name = folder + file_name + Tools.get_counter();
-            else file_name = folder + file_name;
-            file_name += get_type();
-            using (var fileStream = new FileStream(file_name, FileMode.Create))
-            using (var binaryWriter = new BinaryWriter(fileStream))
+            width = image.GetLength(1);
+            if (width % 4 == 0)
             {
-                // Écrivez les octets dans le fichier
-                binaryWriter.Write(bytes.ToArray());
+                update_header();
+                List<byte> bytes = Get_Bytes_bmp();
+                if (random_name) file_name = folder + file_name + Tools.get_counter();
+                else file_name = folder + file_name;
+                file_name += get_type();
+                using (var fileStream = new FileStream(file_name, FileMode.Create))
+                using (var binaryWriter = new BinaryWriter(fileStream))
+                {
+                    // Écrivez les octets dans le fichier
+                    binaryWriter.Write(bytes.ToArray());
+                }
             }
+            else
+            {
+                Console.WriteLine("Impossible de sauvegarder car la largeur n'est pas un multiple de 4");
+            }
+
         }
 
         /// <summary>
