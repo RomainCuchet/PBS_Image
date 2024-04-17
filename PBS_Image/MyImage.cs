@@ -130,21 +130,30 @@ namespace PBS_Image
         {
             int i = 0;
             int j = 0;
-            if (nb_bits_color == 24) // cas encodage rgb standart
-            {
-                for (int data_i = offset; data_i < data.Length; data_i += 3) // boucle d'incrément la longeur de 3 pixels
-                {
+            int nb_bits_pixel = nb_bits_color / 8;
 
-                    image[i, j] = new Pixel(data[data_i + 2], data[data_i + 1], data[data_i]);
-                    j++;
-                    if (j % width == 0)
+            if (nb_bits_color == 24)
+            {
+                int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
+                int dataIndex = offset;
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
                     {
-                        i++;
-                        j = 0;
+                        byte blue = data[dataIndex++];
+                        byte green = data[dataIndex++];
+                        byte red = data[dataIndex++];
+                        image[i, j] = new Pixel(red, green, blue);
+                        j++;
                     }
+
+                    // Aller au début de la prochaine ligne, en sautant les octets de remplissage
+                    dataIndex += (bytesPerRow - (width * nb_bits_pixel));
+                    j = 0;
+                    i++;
                 }
             }
-
         }
         /// <summary>
         /// Print the pixels of the image, too long too be aplied to big images 
@@ -365,11 +374,11 @@ namespace PBS_Image
                 throw new Exception("No channel selected");
             else
             {
-                Pixel[,] newImage = new Pixel[width, height];
+                Pixel[,] newImage = new Pixel[height, width];
 
-                for (int j = 0; j < height; j++)
+                for (int i = 0; i < height; i++)
                 {
-                    for (int i = 0; i < width; i++)
+                    for (int j = 0; j < width; j++)
                     {
                         byte newR = red ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].red, n), n) : (byte)0;
                         byte newG = green ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].green, n), n) : (byte)0;
@@ -410,8 +419,8 @@ namespace PBS_Image
             {
                 for (int j = 0; j < width; j++)
                 {
-                    (byte R, byte G, byte B) toHidePixels = (toHide.image[j, i].red, toHide.image[j, i].green, toHide.image[j, i].blue);
-                    Pixel myPixel = new Pixel(image[j, i].red, image[j, i].green, image[j, i].blue);
+                    (byte R, byte G, byte B) toHidePixels = (toHide.image[i, j].red, toHide.image[i, j].green, toHide.image[i, j].blue);
+                    Pixel myPixel = new Pixel(image[i, j].red, image[i, j].green, image[i, j].blue);
 
                     byte compressed;
                     // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
@@ -433,7 +442,7 @@ namespace PBS_Image
                         Bytes.SetLeastSignificantBits(ref myPixel.blue, compressed, n);
                     }
 
-                    image[j, i] = myPixel;
+                    image[i, j] = myPixel;
                 }
             }
         }
