@@ -83,6 +83,10 @@ namespace PBS_Image
         /// <returns></returns>
         public static MyImage resize(MyImage myimage, double factor = 2)
         {
+
+
+
+            
             if (factor <= 0)
             {
                 Console.WriteLine("tried to resize an image with a negative or null factor");

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PBS_Image
 {
-    internal class Pixel
+    public class Pixel
     {
         public byte red;
         public byte green;
