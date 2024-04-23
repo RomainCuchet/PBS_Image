@@ -12,8 +12,9 @@ namespace PBS_Image
     {
         static void Main(string[] args)
         {
-            Demo.demoTD_34();
-            Demo.demo_mandelbrot();
+            //Demo.demoTD_34();
+            //Demo.demo_mandelbrot();
+            Demo.demo_stegano();
         }
     }
 }

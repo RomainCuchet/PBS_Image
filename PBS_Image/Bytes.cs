@@ -2,7 +2,8 @@
 
 namespace PBS_Image
 {
-    class Bytes
+
+    public static class Bytes
     {
         public static byte GetMaxForNBits(int n)
         {
@@ -64,15 +65,15 @@ namespace PBS_Image
 
             }
         }
-        public static byte CompressBits(byte toCompress, int n)
+        /*public static byte CompressBits(byte toCompress, int n)
         {
             if (n < 0)
-                throw new Exception();
+                throw new ForbiddenValueException();
             else
             {
                 if (n == 0)
                     return 0;
-                byte max = GetMaxForNBits(n);
+                byte max = GetMaxForNBits(n) ;
                 if (max <= toCompress)
                     return toCompress;
                 else
@@ -81,18 +82,47 @@ namespace PBS_Image
                     return val;
                 }
             }
+        }*/
+
+        public static byte CompressBits(byte toCompress, int n)
+        {
+            if (n < 0)
+            {
+                throw new Exception();
+            }
+
+            int maxValue = GetMaxForNBits(n);
+            int compressedValue = toCompress * maxValue / 255;
+
+            return (byte)compressedValue;
         }
-        public static byte DecompressBits(byte toDecompress, int n)
+
+        /*public static byte DecompressBits(byte toDecompress, int n)
         {
 
             if (n <= 0)
-                throw new Exception();
+                throw new ForbiddenValueException();
             else
             {
                 byte max = GetMaxForNBits(n);
                 byte val = (byte)((toDecompress * 255) / max);
                 return val;
             }
+        }*/
+
+        public static byte DecompressBits(byte toDecompress, int n)
+        {
+            if (n <= 0)
+            {
+                throw new Exception();
+            }
+
+            if (toDecompress > GetMaxForNBits(n))
+                return toDecompress;
+
+            byte maxValue = GetMaxForNBits(n);
+
+            return (byte)(toDecompress * 255 / maxValue);
         }
     }
 }

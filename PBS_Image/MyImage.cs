@@ -8,8 +8,9 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
-    internal class MyImage
+    class MyImage
     {
+        #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
         public string type = "BM";    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
                         BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
@@ -24,12 +25,12 @@ namespace PBS_Image
         public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
         public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
         public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-        public int nb_plans=1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-        public int nb_bits_color=24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
+        public int nb_plans = 1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
+        public int nb_bits_color = 24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
         public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
         public int taille_image; //(sur 4 octets)
-        public int hor_res=11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-        public int vert_res=11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
+        public int hor_res = 11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
+        public int vert_res = 11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
         public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
         public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
         // la palette est optionelle
@@ -38,7 +39,9 @@ namespace PBS_Image
         public int p_red; // palette red
         public int p_r; // palette réservé
         public Pixel[,] image;
+        #endregion
 
+        #region constructors
         /// <summary>
         /// constructor by copy
         /// </summary>
@@ -84,6 +87,7 @@ namespace PBS_Image
             height = this.image.GetLength(0);
         }
 
+
         public MyImage(string file_name, string folder = "../../../Images/")
         {
             byte[] data = File.ReadAllBytes(folder + file_name);
@@ -92,10 +96,6 @@ namespace PBS_Image
             get_image(data);
         }
 
-        /// <summary>
-        /// permet d'obtenir les métadatas d'une image au format bitmap
-        /// </summary>
-        /// <param name="data">les bits de l'image</param>
         public void get_meta(byte[] data)
         {
             // les 14 premies bytes constituent l'entête
@@ -114,19 +114,12 @@ namespace PBS_Image
             vert_res = Tools.BytesToInt(Tools.get_bytes_from(data, 42, 45)); ;
             nb_color = Tools.BytesToInt(Tools.get_bytes_from(data, 46, 49)); ;
             nb_color_imp = Tools.BytesToInt(Tools.get_bytes_from(data, 50, 53));
-            if (offset == 58) // La palette est optionelle
-            {
-                p_blue = Tools.BytesToInt(new byte[] { data[54] });
-                p_green = Tools.BytesToInt(new byte[] { data[55] });
-                p_red = Tools.BytesToInt(new byte[] { data[56] });
-                p_r = Tools.BytesToInt(new byte[] { data[57] });
-            }
         }
         /// <summary>
-        /// get a pixel matrix to represent the image
+        /// get a pixel matrix to represent the image, only works without palette and remplissage when nb_bits_image = height*width*3
         /// </summary>
         /// <param name="data">array of bytes</param>
-        public void get_image(byte[] data)
+        public void get_image_basic(byte[] data)
         {
             int i = 0;
             int j = 0;
@@ -139,6 +132,7 @@ namespace PBS_Image
                     j++;
                     if (j % width == 0)
                     {
+                        Console.WriteLine(j);
                         i++;
                         j = 0;
                     }
@@ -146,52 +140,40 @@ namespace PBS_Image
             }
 
         }
-        /// <summary>
-        /// Print the pixels of the image, too long too be aplied to big images 
-        /// </summary>
-        /// <returns></returns>
-        public string ImageToString()
+
+        public void get_image(byte[] data)
         {
-            if (image == null) return "vide";
-            string str = "";
-            for (int i = 0; i < image.GetLength(0); i++)
+            int i = 0;
+            int j = 0;
+            int nb_bits_pixel = nb_bits_color / 8;
+
+            if (nb_bits_color == 24)
             {
-                for (int j = 0; j < image.GetLength(1); j++)
+                int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
+                int dataIndex = offset;
+
+                for (int y = 0; y < height; y++) 
                 {
-                    str += image[i, j].Tostring() + " ";
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte blue = data[dataIndex++];
+                        byte green = data[dataIndex++];
+                        byte red = data[dataIndex++];
+                        image[i, j] = new Pixel(red, green, blue);
+                        j++;
+                    }
+
+                    // Aller au début de la prochaine ligne, en sautant les octets de remplissage
+                    dataIndex += (bytesPerRow - (width * nb_bits_pixel));
+                    j = 0;
+                    i++;
                 }
             }
-            return str;
         }
-        public string Tostring()
-        {
-            string str = $"Image {type}\n" +
-                $"taille_fichier : {taille_fichier}\n" +
-                $"taille entête : {taille_entete}\n" +
-                $"Offset : {offset}\n" +
-                $"width : {width}\n" +
-                $"height :{height}\n" +
-                $"id_ap :{id_ap}\n" +
-                $"nombre de plans  : {nb_plans}\n" +
-                $"nombre de bits par couleur : {nb_bits_color}\n" +
-                $"Format de compression : {comp_format}\n" +
-                $"Taille image : {taille_image}\n" +
-                $"Résolution horizontale : {hor_res}\n" +
-                $"Résolution verticale : {vert_res}\n" +
-                $"nombre de couleur : {nb_color}\n" +
-                $"nombre de couleurs importantes : {nb_color_imp}\n" +
-                $"nombre de couleurs : {nb_color}\n" +
-                $"nombre de couleurs importantes : {nb_color_imp}\n";
-            if (offset == 58)
-            {
-                str += $"Palette bleue : {p_blue}\n" +
-                    $"Palette vert : {p_green}\n" +
-                    $"Palette rouge : {p_red}\n" +
-                    $"Palette réservé : {p_r}\n";
-            }
-            else str += "La palette n'est pas définie";
-            return str;
-        }
+
+
+
+
         /// <summary>
         /// useful if we need to implement other formats
         /// </summary>
@@ -207,58 +189,6 @@ namespace PBS_Image
             if (type == "BM") return 19778;
             return 0;
         }
-
-        public void image_format_width()
-        {
-            if (image.GetLength(1) % 4 != 0)
-            {
-                int new_length = image.GetLength(1) - image.GetLength(1) % 4;
-                Pixel[,] image2 = new Pixel[image.GetLength(0),new_length];
-                for(int i =0;i<image.GetLength(0); i++)
-                {
-                    for(int j = 0; j < new_length; j++)
-                    {
-                        image2[i,j] = image[i,j];
-                    }
-                }
-                image = image2;
-            }
-        }
-        
-        public void update_header()
-        {
-            height = image.GetLength(0);
-            width = image.GetLength(1);
-            taille_fichier = offset + height * width * 3 + offset;
-        }
-
-        /// <summary>
-        /// save MyImage to a file
-        /// </summary>
-        /// <param name="folder">the destination folder</param>
-        /// <param name="file_name">the name of the desstination file</param>
-        /// <param name="random_name">wether to generate a new name or not</param>
-        public void save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
-        {
-            width = image.GetLength(1);
-            if (width % 4 == 0)
-            {
-                update_header();
-                List<byte> bytes = Get_Bytes_bmp();
-                if (random_name) file_name = folder + file_name + Tools.get_counter();
-                else file_name = folder + file_name;
-                file_name += get_type();
-                using (var fileStream = new FileStream(file_name, FileMode.Create))
-                using (var binaryWriter = new BinaryWriter(fileStream))
-                {
-                    // Écrivez les octets dans le fichier
-                    binaryWriter.Write(bytes.ToArray());
-                }
-            }
-            else
-            {
-                Console.WriteLine("Impossible de sauvegarder car la largeur n'est pas un multiple de 4");
-            }
 
         }
 
@@ -284,14 +214,13 @@ namespace PBS_Image
             save_var_byte(vert_res);
             save_var_byte(nb_color);
             save_var_byte(nb_color_imp);
-            if (offset == 58)
+            if (offset > 54)
             {
-                save_var_byte(p_blue, 1);
-                save_var_byte(p_green, 1);
-                save_var_byte(p_red, 1);
-                save_var_byte(p_r, 1);
+                for(int i = 0; i < offset; i++)
+                {
+                    bytes.Add(0);
+                }
             }
-
             foreach (Pixel p in image)
             {
                 foreach (byte b in p.toByte())
@@ -308,6 +237,80 @@ namespace PBS_Image
             }
             return bytes;
         }
+        #endregion
+
+        #region affichage
+        public string imageTostring()
+        {
+            if (image == null) return "vide";
+            string str = "";
+            for (int i = 0; i < image.GetLength(0); i++)
+            {
+                for (int j = 0; j < image.GetLength(1); j++)
+                {
+                    str += image[i, j].Tostring() + " ";
+                }
+            }
+            return str;
+        }
+
+        public void display()
+        {
+            Console.WriteLine(Tostring());
+        }
+
+        public void display_image()
+        {
+            Console.WriteLine(imageTostring());
+        }
+
+        public string Tostring()
+        {
+            string str = $"Image {type}\n" +
+                $"taille_fichier : {taille_fichier}\n" +
+                $"taille entête : {taille_entete}\n" +
+                $"Offset : {offset}\n" +
+                $"width : {width}\n" +
+                $"height :{height}\n" +
+                $"id_ap :{id_ap}\n" +
+                $"nombre de plans  : {nb_plans}\n" +
+                $"nombre de bits par couleur : {nb_bits_color}\n" +
+                $"Format de compression : {comp_format}\n" +
+                $"Taille image : {taille_image}\n" +
+                $"Résolution horizontale : {hor_res}\n" +
+                $"Résolution verticale : {vert_res}\n" +
+                $"nombre de couleur : {nb_color}\n" +
+                $"nombre de couleurs importantes : {nb_color_imp}\n" +
+                $"nombre de couleurs : {nb_color}\n" +
+                $"nombre de couleurs importantes : {nb_color_imp}\n";
+            return str;
+        }
+        #endregion
+
+
+
+        /// <summary>
+        /// save MyImage to a file
+        /// </summary>
+        /// <param name="folder">the destination folder</param>
+        /// <param name="file_name">the name of the desstination file</param>
+        /// <param name="random_name">wether to generate a new name or not</param>
+        public void Save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
+        {
+
+            List<byte> bytes = Get_Bytes_bmp();
+            if (random_name) file_name = folder + file_name + Tools.get_counter();
+            else file_name = folder + file_name;
+            file_name += get_type();
+            using (var fileStream = new FileStream(file_name, FileMode.Create))
+            using (var binaryWriter = new BinaryWriter(fileStream))
+            {
+                // Écrivez les octets dans le fichier
+                binaryWriter.Write(bytes.ToArray());
+            }
+        }
+
+        
 
         /// <summary>
         /// this function rotate the image by angle degrees 
@@ -332,6 +335,110 @@ namespace PBS_Image
             MyImage filtered = new MyImage(this);
             filtered.image = Filter.filter(filtered.image, kernel, basic);
             return filtered;
+        }
+
+        /// <summary>
+        /// Enumération des channels sur lesquels on peut cacher une image, permet une meilleure lisibilité si besoin
+        /// </summary>
+        public enum Hideout
+        {
+            Red = 0b001,
+            Green = 0b010,
+            Blue = 0b100,
+            All = 0b111,
+            Nothing
+        }
+
+        /// <summary>
+        /// Get the hidden image from the current image
+        /// </summary>
+        /// <param name="n">Nombres de bits sur lesquels l'image a été encodée</param>
+        /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public MyImage GetHiddenImage(int n, byte hideout)
+        {
+            byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
+
+            bool red = (Bytes.GetLeastSignificantBits(lsb, 1) == 1);
+            bool green = (Bytes.GetLeastSignificantBits(((byte)(lsb >> 1)), 1) == 1);
+            bool blue = (Bytes.GetLeastSignificantBits(((byte)(lsb >> 2)), 1) == 1);
+
+            if (!red && !blue && !green)
+                throw new Exception("No channel selected");
+            else
+            {
+                Pixel[,] newImage = new Pixel[width, height];
+
+                for (int j = 0; j < height; j++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        byte newR = red ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].red, n), n) : (byte)0;
+                        byte newG = green ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].green, n), n) : (byte)0;
+                        byte newB = blue ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].blue, n), n) : (byte)0;
+
+                        if (!red && blue && green) newR = (byte)((newB + newG) / 2);
+                        else if (red && !blue && green) newB = (byte)((newR + newG) / 2);
+                        else if (red && blue && !green) newG = (byte)((newR + newB) / 2);
+                        else if (red && !blue && !green) newG = newB = newR;
+                        else if (!red && green && !blue) newR = newB = newG;
+                        else if (!red && !green && blue) newR = newG = newB;
+
+                        Pixel newPixel = new Pixel(newR, newG, newB);
+                        newImage[i, j] = newPixel;
+                    }
+                }
+
+                return new MyImage(newImage);
+            }
+        }
+
+
+        /// <summary>
+        /// Hide an image in another image
+        /// </summary>
+        /// <param name="n">nombre de bits dans lesquels l'image sera encodée</param>
+        /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
+        /// <param name="toHide">image à cacher</param>
+        /// <exception cref="Exception"></exception>
+        public void HideImage(int n, byte hideout, MyImage toHide)
+        {
+            if (hideout == 0)
+            {
+                throw new Exception("No channel selected");
+            }
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    (byte R, byte G, byte B) toHidePixels = (toHide.image[j, i].red, toHide.image[j, i].green, toHide.image[j, i].blue);
+                    Pixel myPixel = new Pixel(image[j, i].red, image[j, i].green, image[j, i].blue);
+
+                    byte compressed;
+                    // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
+                    if ((hideout & (byte)Hideout.Red) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.R, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.red, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Green) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.G, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.green, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Blue) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.B, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.blue, compressed, n);
+                    }
+
+                    image[j, i] = myPixel;
+                }
+            }
         }
     }
 }
