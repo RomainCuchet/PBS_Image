@@ -152,7 +152,7 @@ namespace PBS_Image
                 int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
                 int dataIndex = offset;
 
-                for (int y = 0; y < height; y++) 
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -190,8 +190,6 @@ namespace PBS_Image
             return 0;
         }
 
-        }
-
         /// <summary>
         /// get a list of bytes that represents MyImage, required to save it
         /// </summary>
@@ -216,7 +214,7 @@ namespace PBS_Image
             save_var_byte(nb_color_imp);
             if (offset > 54)
             {
-                for(int i = 0; i < offset; i++)
+                for (int i = 0; i < offset; i++)
                 {
                     bytes.Add(0);
                 }
@@ -295,7 +293,7 @@ namespace PBS_Image
         /// <param name="folder">the destination folder</param>
         /// <param name="file_name">the name of the desstination file</param>
         /// <param name="random_name">wether to generate a new name or not</param>
-        public void Save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
+        public void save(string folder = "../../../Images/Save/", string file_name = "Save", bool random_name = true)
         {
 
             List<byte> bytes = Get_Bytes_bmp();
@@ -310,7 +308,7 @@ namespace PBS_Image
             }
         }
 
-        
+
 
         /// <summary>
         /// this function rotate the image by angle degrees 

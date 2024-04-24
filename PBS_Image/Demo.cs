@@ -12,14 +12,14 @@ namespace PBS_Image
     {
         public static void demoTD_34()
         {
-            MyImage image = new MyImage("coco.bmp");
+            MyImage image = new MyImage("ref_statue.bmp");
             image.rotate(15, true).resize(1.3).save();
             image.filter("sharpness").save();
         }
 
-        public static void demo_mandelbrot()
+        public static void mandelbrot()
         {
-           new Mandelbrot(2000,2000).create().save();
+           new Mandelbrot(3000,3000).create().save();
         }
     }
 }
