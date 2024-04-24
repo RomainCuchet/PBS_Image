@@ -14,7 +14,8 @@ namespace PBS_Image
         {
             //Demo.demoTD_34();
             //Demo.demo_mandelbrot();
-            Demo.demo_stegano();
+            //Demo.demo_stegano();
+            Demo.demo_huffman();
         }
     }
 }

@@ -6,8 +6,8 @@ namespace PBS_Image
     //création d'un arbre huffman
     public class Tree
     {
-        Node Root { get; set; }
-        Dictionary<Pixel, int> Frequencies { get; set; }
+        public Node Root { get; set; }
+        public Dictionary<Pixel, int> Frequencies { get; set; }
 
         /// <summary>
         /// Reconstruit un arbre de Huffman à partir d'une table de codage
@@ -61,7 +61,7 @@ namespace PBS_Image
         /// </summary>
         /// <param name="frequencies"></param>
         /// <returns>retourne la racine de l'arbre</returns>
-        public Node BuildTree(Dictionary<Pixel, int> frequencies)
+        public static Node BuildTree(Dictionary<Pixel, int> frequencies)
         {
 
             // Construction d'un heap approximatif
@@ -96,7 +96,7 @@ namespace PBS_Image
         /// <param name="codes">table de codage, à initialiser avant</param>
         /// <returns></returns>
 
-        public Dictionary<Pixel, string> BuildCodeDictionary(Node root, string code, Dictionary<Pixel, string> codes)
+        public Dictionary<Pixel, string> BuildEncodingTable(Node root, string code, Dictionary<Pixel, string> codes)
         {
             if (root.IsLeaf())
             {
@@ -104,8 +104,8 @@ namespace PBS_Image
             }
             else
             {
-                BuildCodeDictionary(root.Left, code + "0", codes);
-                BuildCodeDictionary(root.Right, code + "1", codes);
+                BuildEncodingTable(root.Left, code + "0", codes);
+                BuildEncodingTable(root.Right, code + "1", codes);
             }
 
             return codes;
@@ -139,11 +139,13 @@ namespace PBS_Image
         /// <param name="encoded"></param>
         /// <param name="root"></param>
         /// <returns></returns>
-        public Pixel[,] Decode(string encoded, Node root, int width, int height)
+        public Pixel[,] Decode(string encoded, int width, int height)
         {
-            Pixel[,] decoded = new Pixel[height,width];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
+            Pixel[,] decoded = new Pixel[height, width];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
 
-            Node current = root;
+            Node current = Root;
+            int row = 0;
+            int col = 0;
 
             for (int i = 0; i < encoded.Length; i++)
             {
@@ -158,8 +160,14 @@ namespace PBS_Image
 
                 if (current.IsLeaf()) //fin du chemin => valeur trouvée, le pixel stockée est donc celui cherché
                 {
-                    decoded[i / encoded.Length, i % encoded.Length] = current.Pixel; //attribution, à changer
-                    current = root; //reset au début de l'arbre
+                    decoded[row, col] = current.Pixel; //attribution de la valeur du pixel décodé à la position correcte dans la matrice décodée
+                    current = Root; //reset au début de l'arbre
+                    col ++;
+                    if (col ==  height) //si on a atteint la fin de la ligne, on passe à la suivante
+                    {
+                        col = 0;
+                        row ++;
+                    }
                 }
             }
 
@@ -176,6 +184,30 @@ namespace PBS_Image
         public void SaveEncodingTable(Dictionary<Pixel, string> codes, string path)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns a string representation of the Huffman tree
+        /// </summary>
+        /// <param name="root">The root of the Huffman tree</param>
+        /// <param name="path">The path to the current node</param>
+        /// <returns>A string representation of the Huffman tree</returns>
+        public static string TreeToString(Node root, string path = "")
+        {
+            if (root == null)
+            {
+                return string.Empty;
+            }
+
+            if (root.IsLeaf())
+            {
+                return $"{path}: R={root.Pixel.red}, G={root.Pixel.green}, B={root.Pixel.blue}\n";
+            }
+
+            var left = TreeToString(root.Left, path + "0");
+            var right = TreeToString(root.Right, path + "1");
+
+            return left + right;
         }
     }
 

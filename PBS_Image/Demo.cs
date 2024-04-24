@@ -14,13 +14,13 @@ namespace PBS_Image
         public static void demoTD_34()
         {
             MyImage image = new MyImage("ref_statue.bmp");
-            image.rotate(15, true).resize(1.3).save();
-            image.filter("edge1").save();
+            image.rotate(15, true).resize(1.3).Save();
+            image.filter("edge1").Save();
         }
 
         public static void demo_mandelbrot()
         {
-           new Mandelbrot(2000,2000).create().save();
+           new Mandelbrot(2000,2000).create().Save();
         }
 
         public static void demo_stegano()
@@ -29,13 +29,27 @@ namespace PBS_Image
             MyImage carrier = new MyImage(@"ref_stegano\ref_statue.bmp");
 
             carrier.HideImage(4, 0b111, toHide);
-            carrier.save();
+            carrier.Save();
 
             MyImage hidden = carrier.GetHiddenImage(4, 0b111);
-            hidden.save();
+            hidden.Save();
 
             Console.WriteLine(toHide.Tostring());
         }
         
+        public static void demo_huffman()
+        {
+            MyImage myimage = new MyImage("coco.bmp");
+            var freq = Tree.BuildFrequencyDictionary(myimage.image);
+            Node root = Tree.BuildTree(freq);
+            Tree tree = new Tree(root, freq);
+            Dictionary<Pixel, string> encodingTable = tree.BuildEncodingTable(root,"", new Dictionary<Pixel, string>());
+            string encoded = tree.Encode(myimage.image, encodingTable);
+            Console.WriteLine(tree.Frequencies.Count);
+            //Console.WriteLine(Tree.TreeToString(tree.Root, ""));
+            //Console.WriteLine(encoded);
+            myimage.image = tree.Decode(encoded, 20,20);
+            myimage.Save();
+        }
     }
 }

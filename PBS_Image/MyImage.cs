@@ -38,7 +38,7 @@ namespace PBS_Image
         public int p_green; // palette green
         public int p_red; // palette red
         public int p_r; // palette réservé
-        public Pixel[,] image;
+        public Pixel[,] image { get; set; }
         #endregion
 
         #region constructors

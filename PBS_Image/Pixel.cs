@@ -41,5 +41,29 @@ namespace PBS_Image
         {
             return new Pixel((byte)Math.Clamp(p.red * n, min, max), (byte)Math.Clamp(p.green * n, min, max), (byte)Math.Clamp(p.blue * n, min, max));
         }
+
+        public static bool operator ==(Pixel p1, Pixel p2)
+        {
+            return p1.red == p2.red && p1.green == p2.green && p1.blue == p2.blue;
+        }
+
+        public static bool operator !=(Pixel p1, Pixel p2)
+        {
+            return !(p1 == p2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            Pixel p = (Pixel)obj;
+            return (red == p.red) && (green == p.green) && (blue == p.blue);
+        }
+
+        public override int GetHashCode()
+        {
+            return Tuple.Create(red, green, blue).GetHashCode();
+        }
     }
 }
