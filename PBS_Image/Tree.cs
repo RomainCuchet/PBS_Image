@@ -217,7 +217,6 @@ namespace PBS_Image
             return left + right;
         }
 
-        public
         #endregion
     }
 
