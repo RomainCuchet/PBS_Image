@@ -141,7 +141,8 @@ namespace PBS_Image
         /// <returns></returns>
         public Pixel[,] Decode(string encoded, int width, int height)
         {
-            Pixel[,] decoded = new Pixel[height, width];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
+            Pixel[,] decoded = new Pixel[width, height];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
+            Console.WriteLine($"Matrice de taille {height}x{width} créée");
 
             Node current = Root;
             int row = 0;
@@ -170,9 +171,7 @@ namespace PBS_Image
                     }
                 }
             }
-
             return decoded;
-
         }
 
         /// <summary>
