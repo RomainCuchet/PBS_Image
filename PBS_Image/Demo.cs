@@ -25,8 +25,9 @@ namespace PBS_Image
 
         public static void demo_stegano()
         {
-            MyImage toHide = new MyImage(@"ref_stegano\ref_hideItInStatueOn4Bits.bmp");
-            MyImage carrier = new MyImage(@"ref_stegano\ref_statue.bmp");
+            MyImage toHide = new MyImage("ref_hideItInStatueOn4Bits.bmp");
+            MyImage carrier = new MyImage("ref_statue.bmp");
+            carrier = carrier.resize(2);
 
             carrier.HideImage(4, 0b111, toHide);
             carrier.Save();
@@ -45,7 +46,7 @@ namespace PBS_Image
             Tree tree = new Tree(root, freq);
             Dictionary<Pixel, string> encodingTable = tree.BuildEncodingTable(root,"", new Dictionary<Pixel, string>());
             string encoded = tree.Encode(myimage.image, encodingTable);
-            Console.WriteLine(tree.Frequencies.Count);
+            //Console.WriteLine(tree.Frequencies.Count);
             //Console.WriteLine(Tree.TreeToString(tree.Root, ""));
             //Console.WriteLine(encoded);
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);

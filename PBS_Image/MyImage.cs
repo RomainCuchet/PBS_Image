@@ -152,7 +152,7 @@ namespace PBS_Image
                 int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
                 int dataIndex = offset;
 
-                for (int y = 0; y < height; y++) 
+                for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -190,7 +190,7 @@ namespace PBS_Image
             return 0;
         }
 
-        
+
 
         /// <summary>
         /// get a list of bytes that represents MyImage, required to save it
@@ -216,7 +216,7 @@ namespace PBS_Image
             save_var_byte(nb_color_imp);
             if (offset > 54)
             {
-                for(int i = 0; i < offset; i++)
+                for (int i = 0; i < offset; i++)
                 {
                     bytes.Add(0);
                 }
@@ -310,7 +310,7 @@ namespace PBS_Image
             }
         }
 
-        
+
 
         /// <summary>
         /// this function rotate the image by angle degrees 
@@ -337,6 +337,8 @@ namespace PBS_Image
             return filtered;
         }
 
+
+        #region stegano
         /// <summary>
         /// Enumération des channels sur lesquels on peut cacher une image, permet une meilleure lisibilité si besoin
         /// </summary>
@@ -368,11 +370,11 @@ namespace PBS_Image
                 throw new Exception("No channel selected");
             else
             {
-                Pixel[,] newImage = new Pixel[width, height];
+                Pixel[,] newImage = new Pixel[height, width];
 
-                for (int j = 0; j < height; j++)
+                for (int i = 0; i < height; i++)
                 {
-                    for (int i = 0; i < width; i++)
+                    for (int j = 0; j < width; j++)
                     {
                         byte newR = red ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].red, n), n) : (byte)0;
                         byte newG = green ? Bytes.DecompressBits(Bytes.GetLeastSignificantBits(image[i, j].green, n), n) : (byte)0;
@@ -402,21 +404,40 @@ namespace PBS_Image
         /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
         /// <param name="toHide">image à cacher</param>
         /// <exception cref="Exception"></exception>
-        public void HideImage(int n, byte hideout, MyImage toHide)
+        /*public void HideImage(int n, byte hideout, MyImage toHide)
         {
             if (hideout == 0)
             {
                 throw new Exception("No channel selected");
             }
 
+            if (toHide.width > width || toHide.height > height)
+            {
+                throw new SizeException("hideImage(): The image to hide is too big");
+            }
+            int randomX = new Random().Next(0, width - toHide.width);
+            int randomY = new Random().Next(0, height - toHide.height);
+
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
-                    (byte R, byte G, byte B) toHidePixels = (toHide.image[j, i].red, toHide.image[j, i].green, toHide.image[j, i].blue);
+                    
                     Pixel myPixel = new Pixel(image[j, i].red, image[j, i].green, image[j, i].blue);
 
+                    (byte R, byte G, byte B) toHidePixels;
+
+                    if (j >= randomX && j < randomX + toHide.width && i >= randomY && i < randomY + toHide.height)
+                    {
+                        toHidePixels = (toHide.image[j-randomX, i-randomY].red, toHide.image[j-randomX, i-randomY].green, toHide.image[j-randomX, i-randomY].blue);
+                    }
+                    else
+                    {
+                        toHidePixels = ((byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255));
+                    }
+
                     byte compressed;
+
                     // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
                     if ((hideout & (byte)Hideout.Red) != 0)
                     {
@@ -439,6 +460,63 @@ namespace PBS_Image
                     image[j, i] = myPixel;
                 }
             }
+        }*/
+
+        public void HideImage(int n, byte hideout, MyImage toHide)
+        {
+            if (hideout == 0)
+            {
+                throw new Exception("No channel selected");
+            }
+
+            if (toHide.width > width || toHide.height > height)
+            {
+                throw new SizeException("hideImage(): The image to hide is too big");
+            }
+            int randomX = new Random().Next(0, width - toHide.width);
+            int randomY = new Random().Next(0, height - toHide.height);
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    (byte R, byte G, byte B) toHidePixels;
+
+                    if (j >= randomX && j < randomX + toHide.width && i >= randomY && i < randomY + toHide.height)
+                    {
+                        toHidePixels = (toHide.image[i-randomY, j-randomX].red, toHide.image[i-randomY, j-randomX].green, toHide.image[i-randomY, j-randomX].blue);
+                    }
+                    else
+                    {
+                        toHidePixels = ((byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255));
+                    }
+                    
+                    Pixel myPixel = new Pixel(image[i, j].red, image[i, j].green, image[i, j].blue);
+
+                    byte compressed;
+                    // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
+                    if ((hideout & (byte)Hideout.Red) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.R, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.red, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Green) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.G, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.green, compressed, n);
+                    }
+
+                    if ((hideout & (byte)Hideout.Blue) != 0)
+                    {
+                        compressed = Bytes.CompressBits(toHidePixels.B, n);
+                        Bytes.SetLeastSignificantBits(ref myPixel.blue, compressed, n);
+                    }
+
+                    image[i, j] = myPixel;
+                }
+            }
         }
+        #endregion
     }
 }

@@ -7,8 +7,18 @@ namespace PBS_Image
     public class Tree
     {
         #region Paramètres
-        public Node Root { get; set; }
-        public Dictionary<Pixel, int> Frequencies { get; set; }
+        Node Root { get; set; }
+        Dictionary<Pixel, int> _frequencies { get; set; }
+        #endregion
+
+        #region Propriétés
+        public Dictionary<Pixel, int> Frequencies
+        {
+            get
+            {
+                return _frequencies;
+            }
+        }
         #endregion
 
         #region Constructeurs
@@ -25,7 +35,7 @@ namespace PBS_Image
         public Tree(Node root, Dictionary<Pixel, int> frequencies)
         {
             Root = root;
-            Frequencies = frequencies;
+            _frequencies = frequencies;
         }
         #endregion
 

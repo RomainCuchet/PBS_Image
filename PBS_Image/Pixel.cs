@@ -37,7 +37,7 @@ namespace PBS_Image
             return new byte[] { blue, green, red };
         }
 
-        public static Pixel operator * (Pixel p, int n)
+        public static Pixel operator *(Pixel p, int n)
         {
             return new Pixel((byte)Math.Clamp(p.red * n, min, max), (byte)Math.Clamp(p.green * n, min, max), (byte)Math.Clamp(p.blue * n, min, max));
         }
@@ -61,6 +61,10 @@ namespace PBS_Image
             return (red == p.red) && (green == p.green) && (blue == p.blue);
         }
 
+        /// <summary>
+        /// Retourne le code de hachage de l'objet. Sert à rien mais fait joli 
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             return Tuple.Create(red, green, blue).GetHashCode();
