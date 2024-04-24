@@ -93,8 +93,8 @@ namespace PBS_image
 
         public Conversion_JPEG(MyImage mi)
         {
-            height = mi.Image.GetLength(0);
-            width = mi.Image.GetLength(1);
+            height = mi.image.GetLength(0);
+            width = mi.image.GetLength(1);
             image_JPEG_Y = new double[height, width];
             image_JPEG_Cb = new double[height, width];
             image_JPEG_Cr = new double[height, width];
@@ -103,7 +103,7 @@ namespace PBS_image
             Console.WriteLine("fait");
             DCT();
             codage_zigzag(zigzag);
-            int cpt = 0;
+            /*int cpt = 0;
             for (int i =0; i<data_height; i++)
             {
                 for (int j = 0;j< data_width; j++)
@@ -112,7 +112,7 @@ namespace PBS_image
                     {
                         for(int l=0; l< 8; l++)
                         {
-                            Console.Write((data_JPEG_Y[i, j][k, l]) + " , ");
+                            Console.Write(data_JPEG_Y[i, j][k, l] + " , ");
                             cpt++;
                         }
                         Console.WriteLine();
@@ -120,7 +120,7 @@ namespace PBS_image
                     Console.WriteLine();
                 }
             }
-            Console.WriteLine(cpt);
+            Console.WriteLine(cpt);*/
 
 
         }
@@ -136,17 +136,17 @@ namespace PBS_image
             {
                 for (int j = 0; j < width; j = j + 2)
                 {
-                    pixel_y[0] = 0.299 * mi.Image[i, j].Red + 0.087 * mi.Image[i, j].Green + 0.114 * mi.Image[i, j].Blue;
-                    pixel_cb[0] = -0.1687 * mi.Image[i, j].Red - 0.3313 * mi.Image[i, j].Green + 0.5 * mi.Image[i, j].Blue + 128;
-                    pixel_cr[0] = 0.5 * mi.Image[i, j].Red - 0.4187 * mi.Image[i, j].Green - 0.0813 * mi.Image[i, j].Blue + 128;
+                    pixel_y[0] = 0.299 * mi.image[i, j].red + 0.087 * mi.image[i, j].green + 0.114 * mi.image[i, j].blue;
+                    pixel_cb[0] = -0.1687 * mi.image[i, j].red - 0.3313 * mi.image[i, j].green + 0.5 * mi.image[i, j].blue + 128;
+                    pixel_cr[0] = 0.5 * mi.image[i, j].red - 0.4187 * mi.image[i, j].green - 0.0813 * mi.image[i, j].blue + 128;
 
                     if (i == height - 1)
                     {
                         if (j != width - 1)
                         {
-                            pixel_y[1] = (0.299 * mi.Image[i, j + 1].Red + 0.087 * mi.Image[i, j + 1].Green + 0.114 * mi.Image[i, j + 1].Blue);
-                            pixel_cb[1] = -0.1687 * mi.Image[i, j + 1].Red - 0.3313 * mi.Image[i, j + 1].Green + 0.5 * mi.Image[i, j + 1].Blue + 128;
-                            pixel_cr[1] = 0.5 * mi.Image[i, j + 1].Red - 0.4187 * mi.Image[i, j + 1].Green - 0.0813 * mi.Image[i, j + 1].Blue + 128;
+                            pixel_y[1] = (0.299 * mi.image[i, j + 1].red + 0.087 * mi.image[i, j + 1].green + 0.114 * mi.image[i, j + 1].blue);
+                            pixel_cb[1] = -0.1687 * mi.image[i, j + 1].red - 0.3313 * mi.image[i, j + 1].green + 0.5 * mi.image[i, j + 1].blue + 128;
+                            pixel_cr[1] = 0.5 * mi.image[i, j + 1].red - 0.4187 * mi.image[i, j + 1].green - 0.0813 * mi.image[i, j + 1].blue + 128;
 
                             pixel_cb_sum = (pixel_cb[0] + pixel_cb[1]) / 2;
                             pixel_cr_sum = (pixel_cr[0] + pixel_cr[1]) / 2;
@@ -163,10 +163,10 @@ namespace PBS_image
                     }
                     else if (j == width - 1)
                     {
-                        pixel_y[1] = 0.299 * mi.Image[i + 1, j].Red + 0.087 * mi.Image[i + 1, j].Green + 0.114 * mi.Image[i + 1, j].Blue;
+                        pixel_y[1] = 0.299 * mi.image[i + 1, j].red + 0.087 * mi.image[i + 1, j].green + 0.114 * mi.image[i + 1, j].blue;
 
-                        pixel_cb[1] = -0.1687 * mi.Image[i + 1, j].Red - 0.3313 * mi.Image[i + 1, j].Green + 0.5 * mi.Image[i + 1, j].Blue + 128;
-                        pixel_cr[1] = 0.5 * mi.Image[i + 1, j].Red - 0.4187 * mi.Image[i + 1, j].Green - 0.0813 * mi.Image[i + 1, j].Blue + 128;
+                        pixel_cb[1] = -0.1687 * mi.image[i + 1, j].red - 0.3313 * mi.image[i + 1, j].green + 0.5 * mi.image[i + 1, j].blue + 128;
+                        pixel_cr[1] = 0.5 * mi.image[i + 1, j].red - 0.4187 * mi.image[i + 1, j].green - 0.0813 * mi.image[i + 1, j].blue + 128;
 
                         pixel_cb_sum = (pixel_cb[0] + pixel_cb[1]) / 2;
                         pixel_cr_sum = (pixel_cr[0] + pixel_cr[1]) / 2;
@@ -182,17 +182,17 @@ namespace PBS_image
                     }
                     else
                     {
-                        pixel_y[1] = 0.299 * mi.Image[i, j + 1].Red + 0.087 * mi.Image[i, j + 1].Green + 0.114 * mi.Image[i, j + 1].Blue;
-                        pixel_y[2] = 0.299 * mi.Image[i + 1, j].Red + 0.087 * mi.Image[i + 1, j].Green + 0.114 * mi.Image[i + 1, j].Blue;
-                        pixel_y[3] = 0.299 * mi.Image[i + 1, j + 1].Red + 0.087 * mi.Image[i + 1, j + 1].Green + 0.114 * mi.Image[i + 1, j + 1].Blue;
+                        pixel_y[1] = 0.299 * mi.image[i, j + 1].red + 0.087 * mi.image[i, j + 1].green + 0.114 * mi.image[i, j + 1].blue;
+                        pixel_y[2] = 0.299 * mi.image[i + 1, j].red + 0.087 * mi.image[i + 1, j].green + 0.114 * mi.image[i + 1, j].blue;
+                        pixel_y[3] = 0.299 * mi.image[i + 1, j + 1].red + 0.087 * mi.image[i + 1, j + 1].green + 0.114 * mi.image[i + 1, j + 1].blue;
 
-                        pixel_cb[1] = -0.1687 * mi.Image[i, j + 1].Red - 0.3313 * mi.Image[i, j + 1].Green + 0.5 * mi.Image[i, j + 1].Blue + 128;
-                        pixel_cb[2] = -0.1687 * mi.Image[i + 1, j].Red - 0.3313 * mi.Image[i + 1, j].Green + 0.5 * mi.Image[i + 1, j].Blue + 128;
-                        pixel_cb[3] = -0.1687 * mi.Image[i + 1, j + 1].Red - 0.3313 * mi.Image[i + 1, j + 1].Green + 0.5 * mi.Image[i + 1, j + 1].Blue + 128;
+                        pixel_cb[1] = -0.1687 * mi.image[i, j + 1].red - 0.3313 * mi.image[i, j + 1].green + 0.5 * mi.image[i, j + 1].blue + 128;
+                        pixel_cb[2] = -0.1687 * mi.image[i + 1, j].red - 0.3313 * mi.image[i + 1, j].green + 0.5 * mi.image[i + 1, j].blue + 128;
+                        pixel_cb[3] = -0.1687 * mi.image[i + 1, j + 1].red - 0.3313 * mi.image[i + 1, j + 1].green + 0.5 * mi.image[i + 1, j + 1].blue + 128;
 
-                        pixel_cr[1] = 0.5 * mi.Image[i, j + 1].Red - 0.4187 * mi.Image[i, j + 1].Green - 0.0813 * mi.Image[i, j + 1].Blue + 128;
-                        pixel_cr[2] = 0.5 * mi.Image[i + 1, j].Red - 0.4187 * mi.Image[i + 1, j].Green - 0.0813 * mi.Image[i + 1, j].Blue + 128;
-                        pixel_cr[3] = 0.5 * mi.Image[i + 1, j + 1].Red - 0.4187 * mi.Image[i + 1, j + 1].Green - 0.0813 * mi.Image[i + 1, j + 1].Blue + 128;
+                        pixel_cr[1] = 0.5 * mi.image[i, j + 1].red - 0.4187 * mi.image[i, j + 1].green - 0.0813 * mi.image[i, j + 1].blue + 128;
+                        pixel_cr[2] = 0.5 * mi.image[i + 1, j].red - 0.4187 * mi.image[i + 1, j].green - 0.0813 * mi.image[i + 1, j].blue + 128;
+                        pixel_cr[3] = 0.5 * mi.image[i + 1, j + 1].red - 0.4187 * mi.image[i + 1, j + 1].green - 0.0813 * mi.image[i + 1, j + 1].blue + 128;
 
                         pixel_cb_sum = (pixel_cb[0] + pixel_cb[1] + pixel_cb[2] + pixel_cb[3]) / 4;
                         pixel_cr_sum = (pixel_cr[0] + pixel_cr[1] + pixel_cr[2] + pixel_cr[3]) / 4;
