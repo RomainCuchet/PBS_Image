@@ -48,7 +48,6 @@ namespace PBS_Image
             Console.WriteLine(tree.Frequencies.Count);
             //Console.WriteLine(Tree.TreeToString(tree.Root, ""));
             //Console.WriteLine(encoded);
-            Console.WriteLine(myimage.width +""+ myimage.height );
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);
             myimage.Save();
         }

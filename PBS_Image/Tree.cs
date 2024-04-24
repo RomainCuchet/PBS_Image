@@ -6,9 +6,12 @@ namespace PBS_Image
     //création d'un arbre huffman
     public class Tree
     {
+        #region Paramètres
         public Node Root { get; set; }
         public Dictionary<Pixel, int> Frequencies { get; set; }
+        #endregion
 
+        #region Constructeurs
         /// <summary>
         /// Reconstruit un arbre de Huffman à partir d'une table de codage
         /// </summary>
@@ -24,7 +27,9 @@ namespace PBS_Image
             Root = root;
             Frequencies = frequencies;
         }
+        #endregion
 
+        #region Construction de l'arbre
         /// <summary>
         /// Construit un dictionnaire de fréquences à partir d'une matrice de pixels
         /// </summary>
@@ -110,7 +115,9 @@ namespace PBS_Image
 
             return codes;
         }
+        #endregion
 
+        #region Encodage et décodage
         /// <summary>
         /// Encode une matrice de pixels en une chaine de bits suivant la table de codage prédéfinie
         /// </summary>
@@ -142,7 +149,6 @@ namespace PBS_Image
         public Pixel[,] Decode(string encoded, int width, int height)
         {
             Pixel[,] decoded = new Pixel[width, height];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
-            Console.WriteLine($"Matrice de taille {height}x{width} créée");
 
             Node current = Root;
             int row = 0;
@@ -163,17 +169,19 @@ namespace PBS_Image
                 {
                     decoded[row, col] = current.Pixel; //attribution de la valeur du pixel décodé à la position correcte dans la matrice décodée
                     current = Root; //reset au début de l'arbre
-                    col ++;
-                    if (col ==  height) //si on a atteint la fin de la ligne, on passe à la suivante
+                    col++;
+                    if (col == height) //si on a atteint la fin de la ligne, on passe à la suivante
                     {
                         col = 0;
-                        row ++;
+                        row++;
                     }
                 }
             }
             return decoded;
         }
+        #endregion
 
+        #region Sauvegarde et chargement
         /// <summary>
         /// Sauvegarde la table de codage dans un fichier pour éviter une utilisation trop intensive de la mémoire (256^3 valeurs enregistrées en mémoire)
         /// </summary>
@@ -208,6 +216,9 @@ namespace PBS_Image
 
             return left + right;
         }
+
+        public
+        #endregion
     }
 
 }
