@@ -190,7 +190,7 @@ namespace PBS_Image
             return 0;
         }
 
-        }
+        
 
         /// <summary>
         /// get a list of bytes that represents MyImage, required to save it

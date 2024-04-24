@@ -51,7 +51,8 @@ namespace PBS_Image
                 }
             }
 
-            return Frequencies.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value); ;
+            //return Frequencies.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+            return Frequencies;
         }
 
 
@@ -138,9 +139,9 @@ namespace PBS_Image
         /// <param name="encoded"></param>
         /// <param name="root"></param>
         /// <returns></returns>
-        public Pixel[,] Decode(string encoded, Node root)
+        public Pixel[,] Decode(string encoded, Node root, int width, int height)
         {
-            Pixel[,] decoded = new Pixel[encoded.Length, encoded.Length];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
+            Pixel[,] decoded = new Pixel[height,width];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
 
             Node current = root;
 
