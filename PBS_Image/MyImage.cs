@@ -88,9 +88,9 @@ namespace PBS_Image
         }
 
 
-        public MyImage(string file_name, string folder = "../../../Images/")
+        public MyImage(string path)
         {
-            byte[] data = File.ReadAllBytes(folder + file_name);
+            byte[] data = File.ReadAllBytes(path);
             get_meta(data);
             image = new Pixel[height, width];
             get_image(data);
