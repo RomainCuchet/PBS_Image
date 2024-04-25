@@ -117,9 +117,8 @@ namespace PBS_Image
         //code for Filter by convolution. Only works for 3x3 kernel.
         public static Pixel[,] kernel_filter(Pixel[,] image, double[,] kernel)
         {
-            int height = image.GetLength(0);
+            int heigth = image.GetLength(0);
             int width = image.GetLength(1);
-            int verif;
             int start_row = 0;
             int end_row = 0;
             int start_column = 0;
@@ -127,102 +126,33 @@ namespace PBS_Image
             double blueX;
             double greenX;
             double redX;
-            Pixel[,] image2 = new Pixel[height, width];
-            for (int i = 0; i < height; i++)
+            Pixel[,] image2 = new Pixel[heigth, width];
+            for (int i = 0; i < heigth; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
                     image2[i, j] = new Pixel(image[i, j].red, image[i, j].green, image[i, j].blue);
                 }
             }
-            for (int i = 0; i < height; i++)
+            for (int i = 0; i < heigth; i++)
             {
                 for (int j = 0; j < width; j++)
                 {
                     blueX = 0;
                     greenX = 0;
                     redX = 0;
-                    verif = 0;
-                    if (i == 0 && verif == 0)
+                    if (i - kernel.GetLength(0) / 2 < 0) start_row = 0; else start_row = i - kernel.GetLength(0) / 2;
+                    if (i + kernel.GetLength(0) / 2 >= heigth) end_row = heigth - 1; else end_row = i + kernel.GetLength(0) / 2;
+                    if (j - kernel.GetLength(1) / 2 < 0) start_column = 0; else start_column = j - kernel.GetLength(1) / 2;
+                    if (j + kernel.GetLength(1) / 2 >= width) end_column = width - 1; else end_column = j + kernel.GetLength(0) / 2;
+
+                    for (int m = start_row; m <= end_row; m++)
                     {
-                        verif = 1;
-                        if (j == 0)
+                        for (int n = start_column; n <= end_column; n++)
                         {
-                            start_row = i;
-                            end_row = i + 1;
-                            start_column = j;
-                            end_column = j + 1;
-                        }
-                        else if (j == width - 1)
-                        {
-                            start_row = i;
-                            end_row = i + 1;
-                            start_column = j - 1;
-                            end_column = j;
-                        }
-                        else
-                        {
-                            start_row = i;
-                            end_row = i + 1;
-                            start_column = j - 1;
-                            end_column = j + 1;
-                        }
-                    }
-                    if (i == height - 1 && verif == 0)
-                    {
-                        verif = 1;
-                        if (j == 0)
-                        {
-                            start_row = i - 1;
-                            end_row = i;
-                            start_column = j;
-                            end_column = j + 1;
-                        }
-                        else if (j == width - 1)
-                        {
-                            start_row = i - 1;
-                            end_row = i;
-                            start_column = j - 1;
-                            end_column = j;
-                        }
-                        else
-                        {
-                            start_row = i - 1;
-                            end_row = i;
-                            start_column = j - 1;
-                            end_column = j + 1;
-                        }
-                    }
-                    if (j == 0 && verif == 0)
-                    {
-                        verif = 1;
-                        start_row = i - 1;
-                        end_row = i + 1;
-                        start_column = j;
-                        end_column = j + 1;
-                    }
-                    if (j == width - 1 && verif == 0)
-                    {
-                        verif = 1;
-                        start_row = i - 1;
-                        end_row = i + 1;
-                        start_column = j - 1;
-                        end_column = j;
-                    }
-                    if (verif == 0)
-                    {
-                        start_row = i - 1;
-                        end_row = i + 1;
-                        start_column = j - 1;
-                        end_column = j + 1;
-                    }
-                    for (int cpt = start_row; cpt <= end_row; cpt++)
-                    {
-                        for (int cpt2 = start_column; cpt2 <= end_column; cpt2++)
-                        {
-                            blueX += image2[cpt, cpt2].blue * kernel[cpt - i + 1, cpt2 - j + 1];
-                            greenX += image2[cpt, cpt2].green * kernel[cpt - i + 1, cpt2 - j + 1];
-                            redX += image2[cpt, cpt2].red * kernel[cpt - i + 1, cpt2 - j + 1];
+                            blueX += image2[m, n].blue * kernel[m - (i - kernel.GetLength(0) / 2), n - (j - kernel.GetLength(1) / 2)];
+                            greenX += image2[m, n].green * kernel[m - (i - kernel.GetLength(0) / 2), n - (j - kernel.GetLength(1) / 2)];
+                            redX += image2[m, n].red * kernel[m - (i - kernel.GetLength(0) / 2), n - (j - kernel.GetLength(1) / 2)];
                         }
                     }
                     image[i, j].blue = get_color(blueX);
@@ -232,6 +162,5 @@ namespace PBS_Image
             }
             return image;
         }
-
     }
 }
