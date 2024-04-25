@@ -6,4 +6,8 @@ namespace PBS_Image
     {
         public SizeException(string message) : base(message) { }
     }
+    public class NoChannelException : Exception
+    {
+        public NoChannelException(string message) : base(message) { }
+    }
 }
