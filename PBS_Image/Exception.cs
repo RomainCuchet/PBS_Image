@@ -10,4 +10,9 @@ namespace PBS_Image
     {
         public NoChannelException(string message) : base(message) { }
     }
+    
+    public class InvalideArgumentException : Exception
+    {
+        public InvalideArgumentException(string message) : base(message) { }
+    }
 }

@@ -35,11 +35,13 @@ namespace PBS_Image
             MyImage carrier = new MyImage(carrierImage);
             carrier = carrier.resize(scale);
 
-            carrier.HideImage(4, 0b111, toHide);
+            carrier.HideImage(4, 0b111, [toHide]);
             carrier.Save();
 
-            MyImage hidden = carrier.GetHiddenImage(4, 0b111);
-            hidden.Save();
+            (MyImage hidden1, MyImage hidden2, MyImage hidden3) = carrier.GetHiddenImage(4, 0b111, false);
+            hidden1.Save();
+            hidden2.Save();
+            hidden3.Save();
 
         }
 
@@ -55,7 +57,7 @@ namespace PBS_Image
             Console.WriteLine(tree.Frequencies.Count);
             Console.WriteLine(Tree.TreeToString(tree.Root, ""));
             Console.WriteLine(encoded);
-            Console.WriteLine($"Header:\n{Tree.StructureDHTHeader(tree.Root).ToString()}");
+            //Console.WriteLine($"Header:\n{Tree.StructureDHTHeader(tree.Root).ToString()}");
 
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);
             myimage.Save();
