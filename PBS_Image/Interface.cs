@@ -15,7 +15,7 @@ namespace PBS_Image
     internal class Interface
     {
         static string racine = "../../../Images/";
-        static string[] filters = ["sharpness", "box blur", "edge1", "edge2", "edge3"];
+        static string[] filters = ["sharpness", "box blur", "edge1", "edge2", "edge3","embossing", "reflect"];
         static string[] folders = ["Save/", "ref_stegano/","Default/"];
 
         
