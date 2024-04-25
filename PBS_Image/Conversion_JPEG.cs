@@ -11,14 +11,14 @@ namespace PBS_image
         public double[,][,] data_JPEG_Y;
         public double[,][,] data_JPEG_Cb;
         public double[,][,] data_JPEG_Cr;
-        Pixel[,] result;
-        byte[,] result_Y;
-        byte[,] result_Cb;
-        byte[,] result_Cr;
-        int height;
-        int width;
-        int data_height;
-        int data_width;
+        public Pixel[,] result;
+        public byte[,] result_Y;
+        public byte[,] result_Cb;
+        public byte[,] result_Cr;
+        public int height;
+        public int width;
+        public int data_height;
+        public int data_width;
 
         double pi = Math.PI;
 
