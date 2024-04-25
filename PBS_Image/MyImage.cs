@@ -358,7 +358,7 @@ namespace PBS_Image
         /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public (MyImage, MyImage, MyImage) GetHiddenImage(int n, byte hideout, bool triple = false)
+        public MyImage GetHiddenImage(int n, byte hideout)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
 
@@ -371,8 +371,6 @@ namespace PBS_Image
             else
             {
                 Pixel[,] newImage1 = new Pixel[height, width];
-                Pixel[,] newImage2 = new Pixel[height, width];
-                Pixel[,] newImage3 = new Pixel[height, width];
 
                 for (int i = 0; i < height; i++)
                 {
@@ -389,23 +387,14 @@ namespace PBS_Image
                         else if (!red && green && !blue) newR = newB = newG;
                         else if (!red && !green && blue) newR = newG = newB;
 
-                        if (triple)
-                        {
-                            newImage1[i, j] = new Pixel(newR, newR, newR);
-                            newImage2[i, j] = new Pixel(newG, newG, newG);
-                            newImage3[i, j] = new Pixel(newB, newB, newB);
-                        }
-                        else
-                        {
-                            newImage1[i, j] = new Pixel(newR, newG, newB);
-                            newImage2[i, j] = new Pixel(newR, newG, newB);
-                            newImage3[i, j] = new Pixel(newR, newG, newB);
-                        }
+
+                        newImage1[i, j] = new Pixel(newR, newG, newB);
+
 
                     }
                 }
 
-                return (new MyImage(newImage1), new MyImage(newImage2), new MyImage(newImage3));
+                return new MyImage(newImage1);
             }
         }
 
@@ -419,30 +408,20 @@ namespace PBS_Image
         /// <exception cref="NoChannelException">Si aucun channel pour cacher n'est sélectionné</exception>
         /// <exception cref="SizeException">Si l'image à cacher est plus grande que l'image de support</exception>
 
-        public void HideImage(int n, byte hideout, MyImage[] toHides)
+        public void HideImage(int n, byte hideout, MyImage toHide)
         {
             if (hideout == 0)
             {
                 throw new NoChannelException("No channel selected");
             }
-            if (toHides.Length == 0 || toHides.Length > 3)
+
+            if (toHide.width > width || toHide.height > height)
             {
-                throw new InvalideArgumentException("HideImage(): toHides must be an array of 1 to 3 images");
+                throw new SizeException("hideImage(): The image to hide is too big");
             }
 
-            foreach (MyImage toHide in toHides)
-            {
-                if (toHide.width > width || toHide.height > height)
-                {
-                    throw new SizeException("hideImage(): The image to hide is too big");
-                }
-            }
-
-            (int, int)[] randomPos = new (int, int)[toHides.Length];
-            for (int i = 0; i < toHides.Length; i++)
-            {
-                randomPos[i] = (new Random().Next(0, width - toHides[i].width), new Random().Next(0, height - toHides[i].height));
-            }
+            (int, int) randomPos =  (new Random().Next(0, width - toHide.width), new Random().Next(0, height - toHide.height));
+            
 
             for (int i = 0; i < height; i++)
             {
@@ -450,22 +429,16 @@ namespace PBS_Image
                 {
                     (byte R, byte G, byte B) toHidePixels = (0, 0, 0);
 
-                    if (toHides.Length == 1)
-                    {
-                        if (j >= randomPos[0].Item1 && j < randomPos[0].Item1 + toHides[0].width && i >= randomPos[0].Item2 && i < randomPos[0].Item2 + toHides[0].height)
+                        if (j >= randomPos.Item1 && j < randomPos.Item1 + toHide.width && i >= randomPos.Item2 && i < randomPos.Item2 + toHide.height)
                         {
-                            toHidePixels = (toHides[0].image[i - randomPos[0].Item2, j - randomPos[0].Item1].red, toHides[0].image[i - randomPos[0].Item2, j - randomPos[0].Item1].green, toHides[0].image[i - randomPos[0].Item2, j - randomPos[0].Item1].blue);
+                            toHidePixels = (toHide.image[i - randomPos.Item2, j - randomPos.Item1].red, toHide.image[i - randomPos.Item2, j - randomPos.Item1].green, toHide.image[i - randomPos.Item2, j - randomPos.Item1].blue);
                         }
 
                         else
                         {
                             toHidePixels = ((byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255));
                         }
-                    }
-
-                    else if(toHides.Length == 2){
-                        
-                    }
+                    
 
                     Pixel myPixel = new Pixel(image[i, j].red, image[i, j].green, image[i, j].blue);
 
@@ -492,6 +465,20 @@ namespace PBS_Image
                     image[i, j] = myPixel;
                 }
             }
+        }
+        #endregion
+
+        #region inno stegano
+        public (MyImage, MyImage, MyImage) GetTripleImage(int n)
+        {
+            return (GetHiddenImage(n, 0b001), GetHiddenImage(n, 0b010), GetHiddenImage(n, 0b100));
+        }
+
+        public void HideTripleImage(int n, MyImage red, MyImage green, MyImage blue)
+        {
+            HideImage(n, 0b001, red);
+            HideImage(n, 0b010, green);
+            HideImage(n, 0b100, blue);
         }
         #endregion
     }

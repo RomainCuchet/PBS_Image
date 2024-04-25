@@ -35,16 +35,35 @@ namespace PBS_Image
             MyImage carrier = new MyImage(carrierImage);
             carrier = carrier.resize(scale);
 
-            carrier.HideImage(4, 0b111, [toHide]);
+            carrier.HideImage(4, 0b111, toHide);
             carrier.Save();
 
-            (MyImage hidden1, MyImage hidden2, MyImage hidden3) = carrier.GetHiddenImage(4, 0b111, false);
+            MyImage hidden1 = carrier.GetHiddenImage(4, 0b111);
+            hidden1.Save();
+
+        }
+
+        public static void demo_stegano_triple(double scale = 1, string carrierImage = "ref_statue.bmp", string toHideImage1 = "ref_hideItInStatueOn4Bits.bmp", string toHideImage2 = "coco.bmp", string toHideImage3 = "coco.bmp")
+        {
+            MyImage toHide1 = new MyImage(toHideImage1);
+            MyImage toHide2 = new MyImage(toHideImage2);
+            MyImage toHide3 = new MyImage(toHideImage3);
+            MyImage carrier = new MyImage(carrierImage);
+            carrier = carrier.resize(scale);
+
+            carrier.HideTripleImage(4, toHide1, toHide2, toHide3);
+            carrier.Save();
+
+            (MyImage hidden1,MyImage hidden2, MyImage hidden3) = carrier.GetTripleImage(4);
             hidden1.Save();
             hidden2.Save();
             hidden3.Save();
 
         }
 
+        /// <summary>
+        /// Demo de l'algorithme de Huffman
+        /// </summary>
         public static void demo_huffman()
         {
             MyImage myimage = new MyImage("Test.bmp");
