@@ -60,6 +60,27 @@ namespace PBS_Image
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);
             myimage.Save();
         }
+
+        public static void demo_conversion_jpeg(MyImage mi) //On ne sait pas si le résultat est viable parceque pas réussi sauvegarde JPEG.
+        {
+            Conversion_JPEG jj = new Conversion_JPEG(mi);
+            int cpt = 0;
+            for (int i = 0; i < jj.data_height; i++)
+            {
+                for (int j = 0; j < jj.data_width; j++)
+                {
+                    for (int k = 0; k < 8;k++)
+                    {
+                        for(int l =0; l< 8;l++)
+                        {
+                            cpt++;
+                            Console.Write(jj.result_Cb[i*8 + k, j*8 + l] +" , "); //Peut montrer Y ou Cr. Juste changer la matrice
+                        }Console.WriteLine();
+                    }Console.WriteLine();
+                }
+            }
+            Console.WriteLine(cpt); //Montre le nombre de pixels parcourus
+        }
     }
     */
 }

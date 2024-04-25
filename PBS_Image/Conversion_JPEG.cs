@@ -11,11 +11,14 @@ namespace PBS_image
         public double[,][,] data_JPEG_Y;
         public double[,][,] data_JPEG_Cb;
         public double[,][,] data_JPEG_Cr;
-        Pixel[,] result;
-        int height;
-        int width;
-        int data_height;
-        int data_width;
+        public Pixel[,] result;
+        public byte[,] result_Y;
+        public byte[,] result_Cb;
+        public byte[,] result_Cr;
+        public int height;
+        public int width;
+        public int data_height;
+        public int data_width;
 
         double pi = Math.PI;
 
@@ -96,26 +99,6 @@ namespace PBS_image
             Console.WriteLine("fait");
             DCT();
             codage_zigzag(zigzag);
-            /*int cpt = 0;
-            for (int i =0; i<data_height; i++)
-            {
-                for (int j = 0;j< data_width; j++)
-                {
-                    for( int k =0; k < 8; k++)
-                    {
-                        for(int l=0; l< 8; l++)
-                        {
-                            Console.Write(data_JPEG_Y[i, j][k, l] + " , ");
-                            cpt++;
-                        }
-                        Console.WriteLine();
-                    }
-                    Console.WriteLine();
-                }
-            }
-            Console.WriteLine(cpt);*/
-
-
         }
 
         public void Color_Transformation_x_Echantillonage(MyImage mi)
@@ -328,12 +311,9 @@ namespace PBS_image
                                     somme_Cr += data_JPEG_Cr[i, j][x, y] * Math.Cos((2 * x + 1) * pi * k / 16) * Math.Cos((2 * y + 1) * pi * l / 16);
                                 }
                             }
-
                             res_Y[i, j][k, l] = 0.25 * cl * ck * somme_Y / quant_luminance[k, l];
                             res_Cb[i, j][k, l] = 0.25 * cl * ck * somme_Cb / quant_chrominance[k, l];
                             res_Cr[i, j][k, l] = 0.25 * cl * ck * somme_Cr / quant_chrominance[k, l];
-                            
-
                         }
                     }
                 }
@@ -345,6 +325,9 @@ namespace PBS_image
         public void codage_zigzag(int[,] mat_zigzag)
         {
             result = new Pixel[data_height * 8, data_width * 8];
+            result_Y = new byte[data_height * 8, data_width * 8];
+            result_Cb = new byte[data_height * 8, data_width * 8];
+            result_Cr = new byte[data_height * 8, data_width * 8];
             int index_i;
             int index_j;
             for (int i = 0; i < data_height; i += 8)
@@ -358,14 +341,13 @@ namespace PBS_image
                             index_j = mat_zigzag[k, l] % 8;
                             index_i = mat_zigzag[k, l] / 8;
                             result[i + index_i, j + index_j] = new Pixel((byte)(data_JPEG_Y[i, j][k, l]), (byte)(data_JPEG_Cb[i, j][k, l]), (byte)(data_JPEG_Cr[i, j][k, l]));
+                            result_Y[i + index_i, j + index_j] = (byte)(data_JPEG_Y[i, j][k, l]);
+                            result_Cb[i + index_i, j + index_j] = (byte)(data_JPEG_Cb[i, j][k, l]);
+                            result_Cr[i + index_i, j + index_j] = (byte)(data_JPEG_Cr[i, j][k, l]);
                         }
                     }
                 }
             }
-
         }
-
     }
-
-
 }
