@@ -83,10 +83,6 @@ namespace PBS_Image
         /// <returns></returns>
         public static MyImage resize(MyImage myimage, double factor = 2)
         {
-
-
-
-            
             if (factor <= 0)
             {
                 Console.WriteLine("tried to resize an image with a negative or null factor");
@@ -107,6 +103,52 @@ namespace PBS_Image
             }
             return extendedImage;
         }
+
+        public static MyImage resize_width(MyImage myimage, double factor = 2)
+        {
+            if (factor <= 0)
+            {
+                Console.WriteLine("tried to resize an image with a negative or null factor");
+                return myimage;
+            }
+            MyImage extendedImage = new MyImage(myimage);
+            extendedImage.width = (int)(extendedImage.width * factor);
+            extendedImage.width -= extendedImage.width % 4; // must be multiple of 4
+            extendedImage.height = myimage.height;
+            extendedImage.image = new Pixel[myimage.height, extendedImage.width];
+            extendedImage.taille_image = extendedImage.height * extendedImage.width * 3; // one piwel is composed of 3 byte
+            for (int i = 0; i < extendedImage.height; i++)
+            {
+                for (int j = 0; j < extendedImage.width; j++)
+                {
+                    extendedImage.image[i, j] = myimage.image[(int)(i / factor), (int)(j / factor)];
+                }
+            }
+            return extendedImage;
+        }
+
+        public static MyImage resize_height(MyImage myimage, double factor = 2)
+        {
+            if (factor <= 0)
+            {
+                Console.WriteLine("tried to resize an image with a negative or null factor");
+                return myimage;
+            }
+            MyImage extendedImage = new MyImage(myimage);
+            extendedImage.width = myimage.width;
+            extendedImage.height = (int)(extendedImage.height * factor);
+            extendedImage.image = new Pixel[extendedImage.height, myimage.width];
+            extendedImage.taille_image = extendedImage.height * extendedImage.width * 3; // one piwel is composed of 3 byte
+            for (int i = 0; i < extendedImage.height; i++)
+            {
+                for (int j = 0; j < extendedImage.width; j++)
+                {
+                    extendedImage.image[i, j] = myimage.image[(int)(i / factor), (int)(j / factor)];
+                }
+            }
+            return extendedImage;
+        }
+
         public static MyImage rotate(MyImage image, double angle, bool interpo, bool optimal_dim)
         {
             if (angle == 0 || angle == 90 || angle == 180 || angle == 270) return basic_rotate_image(image, (int)angle);

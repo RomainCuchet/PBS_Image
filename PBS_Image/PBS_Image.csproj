@@ -11,4 +11,8 @@
     <PackageReference Include="ConsoleAppVisuals" Version="3.5.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Images\Hidden_Stegano\" />
+  </ItemGroup>
+
 </Project>
