@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 
 namespace PBS_Image
-{
+{/*
     internal class Demo
     {
         public static void demoTD_34()
@@ -53,4 +53,5 @@ namespace PBS_Image
             myimage.Save();
         }
     }
+    */
 }

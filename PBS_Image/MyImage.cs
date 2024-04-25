@@ -356,7 +356,7 @@ namespace PBS_Image
         /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public MyImage GetHiddenImage(int n, byte hideout)
+        public MyImage GetHiddenImage(int n=4, byte hideout=0b111)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
 
@@ -460,7 +460,7 @@ namespace PBS_Image
             }
         }*/
 
-        public void HideImage(int n, byte hideout, MyImage toHide)
+        public void HideImage(MyImage toHide,int n =4,byte hideout = 0b111)
         {
             if (hideout == 0)
             {

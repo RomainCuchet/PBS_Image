@@ -67,6 +67,8 @@ namespace PBS_Image
                 "Rotate an image",
                 "Resize an image",
                 "Generate a fractale",
+                "Hide Steganography",
+                "Reveal Steganography",
                 ]);
             Dialog save_menu = new(new List<string> { "Select a name to save the image"},leftOption:"Make my own",rightOption:$"Save{Tools.get_counter(inc:false)+1}.bmp");
             Text text = new(new List<string>() {""});
@@ -95,7 +97,7 @@ namespace PBS_Image
             Window.AddElement(int_selector);
             Window.AddElement(prompt);
 
-            void SaveImage(MyImage image)
+            void SaveImage(MyImage image, string folder = "")
             {
                 Window.ActivateElement(save_menu);
                 DialogOption option = save_menu.GetResponse().Value;
@@ -103,7 +105,8 @@ namespace PBS_Image
                 {
                     Window.DeactivateElement(save_menu);
                     Window.ActivateElement(prompt);
-                    image.save(file_name: prompt.GetResponse().Value, random_name: false);
+                    if (folder == "") image.save(file_name: prompt.GetResponse().Value, random_name: false);
+                    else image.save(file_name: prompt.GetResponse().Value, random_name: false, folder: racine + folder);
                     Window.DeactivateElement(prompt);
                     text.UpdateLines(new List<string>() { "Succesfully saved the image" });
                     Window.ActivateElement(text);
@@ -113,6 +116,8 @@ namespace PBS_Image
 
                 else if (option == DialogOption.Right)
                 {
+                    if (folder == "") image.save();
+                    else image.save(folder: racine + folder);
                     image.save();
                     text.UpdateLines(new List<string>() { "Succesfully saved the image" });
                     Window.ActivateElement(text);
@@ -122,6 +127,7 @@ namespace PBS_Image
             }
 
             string path = "";
+            string stegano_folder = "Hide_Stegano/";
             while (true)
             {
                 Window.ActivateElement(title);
@@ -222,7 +228,54 @@ namespace PBS_Image
                                 Window.DeactivateElement(int_selector);
                                 image = new Mandelbrot(size,size).create();
                                 SaveImage(image);
-                                break;  
+                                break;
+                            case 5:
+                                Window.DeactivateElement(title);
+                                Window.DeactivateElement(home_menu);
+                                text.UpdateLines(new List<string>() { "Select an image to hide" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                string image_path = choose_file_folder(file_selector, folder_selector, text);
+                                MyImage image_to_hide = new MyImage(image_path);
+                                Window.DeactivateElement(text);
+                                text.UpdateLines(new List<string>() { "Select an image to hide the image in" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                string image_to_hide_path = choose_file_folder(file_selector, folder_selector, text);
+                                MyImage image_to_hide_in = new MyImage(image_to_hide_path);
+                                if (image_to_hide.width > image_to_hide_in.width || image_to_hide.height > image_to_hide_in.height)
+                                {
+                                    image_to_hide_in = image_to_hide_in.resize(Math.Max((double)image_to_hide.width / image_to_hide_in.width, (double)image_to_hide.height / image_to_hide_in.height) + 0.1);
+                                }
+                                try { image_to_hide_in.HideImage(image_to_hide); }
+                                catch (Exception ex)
+                                {
+                                    text.UpdateLines(new List<string>() { ex.Message });
+                                    Window.ActivateElement(text);
+                                    Thread.Sleep(3000);
+                                    Window.DeactivateElement(text);
+                                }
+
+                                Window.DeactivateElement(text);
+                                text.UpdateLines(new List<string>() { $"Image will be available in {stegano_folder}" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                SaveImage(image_to_hide_in, stegano_folder);
+                                Window.DeactivateElement(text);
+                                break;
+                            case 6:
+                                Window.DeactivateElement(title);
+                                Window.DeactivateElement(home_menu);
+                                text.UpdateLines(new List<string>() { "Select an image to reveal" });
+                                Window.ActivateElement(text);
+                                string image_to_reveal_path = choose_file(file_selector, text, stegano_folder);
+                                MyImage hidden = new MyImage(image_to_reveal_path);
+                                hidden = hidden.GetHiddenImage();
+                                SaveImage(hidden);
+                                break;
                             default:
                                 break;
                         }
