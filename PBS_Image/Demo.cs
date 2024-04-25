@@ -20,14 +20,20 @@ namespace PBS_Image
 
         public static void demo_mandelbrot()
         {
-           new Mandelbrot(2000,2000).create().Save();
+            new Mandelbrot(2000, 2000).create().Save();
         }
 
-        public static void demo_stegano()
+        /// <summary>
+        /// Demo de la stéganographie
+        /// </summary>
+        /// <param name="scale">Paramètre d'agrandissement de l'image de support: permet de démontrer la fonctionnalité pluri taille de l'image</param>
+        /// <param name="carrierImage">Image de support</param>
+        /// <param name="toHideImage">Image à cacher</param>
+        public static void demo_stegano(double scale = 1, string carrierImage = "ref_statue.bmp", string toHideImage = "ref_hideItInStatueOn4Bits.bmp")
         {
-            MyImage toHide = new MyImage("ref_hideItInStatueOn4Bits.bmp");
-            MyImage carrier = new MyImage("ref_statue.bmp");
-            carrier = carrier.resize(2);
+            MyImage toHide = new MyImage(toHideImage);
+            MyImage carrier = new MyImage(carrierImage);
+            carrier = carrier.resize(scale);
 
             carrier.HideImage(4, 0b111, toHide);
             carrier.Save();
@@ -35,20 +41,22 @@ namespace PBS_Image
             MyImage hidden = carrier.GetHiddenImage(4, 0b111);
             hidden.Save();
 
-            Console.WriteLine(toHide.Tostring());
         }
-        
+
         public static void demo_huffman()
         {
-            MyImage myimage = new MyImage("coco.bmp");
+            MyImage myimage = new MyImage("Test.bmp");
             var freq = Tree.BuildFrequencyDictionary(myimage.image);
             Node root = Tree.BuildTree(freq);
             Tree tree = new Tree(root, freq);
-            Dictionary<Pixel, string> encodingTable = tree.BuildEncodingTable(root,"", new Dictionary<Pixel, string>());
+            Dictionary<Pixel, string> encodingTable = tree.BuildEncodingTable(root, "", new Dictionary<Pixel, string>());
             string encoded = tree.Encode(myimage.image, encodingTable);
-            //Console.WriteLine(tree.Frequencies.Count);
-            //Console.WriteLine(Tree.TreeToString(tree.Root, ""));
-            //Console.WriteLine(encoded);
+
+            Console.WriteLine(tree.Frequencies.Count);
+            Console.WriteLine(Tree.TreeToString(tree.Root, ""));
+            Console.WriteLine(encoded);
+            Console.WriteLine($"Header:\n{Tree.StructureDHTHeader(tree.Root).ToString()}");
+
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);
             myimage.Save();
         }

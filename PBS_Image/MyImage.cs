@@ -403,70 +403,14 @@ namespace PBS_Image
         /// <param name="n">nombre de bits dans lesquels l'image sera encodée</param>
         /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
         /// <param name="toHide">image à cacher</param>
-        /// <exception cref="Exception"></exception>
-        /*public void HideImage(int n, byte hideout, MyImage toHide)
-        {
-            if (hideout == 0)
-            {
-                throw new Exception("No channel selected");
-            }
-
-            if (toHide.width > width || toHide.height > height)
-            {
-                throw new SizeException("hideImage(): The image to hide is too big");
-            }
-            int randomX = new Random().Next(0, width - toHide.width);
-            int randomY = new Random().Next(0, height - toHide.height);
-
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    
-                    Pixel myPixel = new Pixel(image[j, i].red, image[j, i].green, image[j, i].blue);
-
-                    (byte R, byte G, byte B) toHidePixels;
-
-                    if (j >= randomX && j < randomX + toHide.width && i >= randomY && i < randomY + toHide.height)
-                    {
-                        toHidePixels = (toHide.image[j-randomX, i-randomY].red, toHide.image[j-randomX, i-randomY].green, toHide.image[j-randomX, i-randomY].blue);
-                    }
-                    else
-                    {
-                        toHidePixels = ((byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255));
-                    }
-
-                    byte compressed;
-
-                    // we will choose an arbitrary color to hide a grayscale so red green and then blue but it doesnt matter
-                    if ((hideout & (byte)Hideout.Red) != 0)
-                    {
-                        compressed = Bytes.CompressBits(toHidePixels.R, n);
-                        Bytes.SetLeastSignificantBits(ref myPixel.red, compressed, n);
-                    }
-
-                    if ((hideout & (byte)Hideout.Green) != 0)
-                    {
-                        compressed = Bytes.CompressBits(toHidePixels.G, n);
-                        Bytes.SetLeastSignificantBits(ref myPixel.green, compressed, n);
-                    }
-
-                    if ((hideout & (byte)Hideout.Blue) != 0)
-                    {
-                        compressed = Bytes.CompressBits(toHidePixels.B, n);
-                        Bytes.SetLeastSignificantBits(ref myPixel.blue, compressed, n);
-                    }
-
-                    image[j, i] = myPixel;
-                }
-            }
-        }*/
+        /// <exception cref="NoChannelException">Si aucun channel pour cacher n'est sélectionné</exception>
+        /// <exception cref="SizeException">Si l'image à cacher est plus grande que l'image de support</exception>
 
         public void HideImage(int n, byte hideout, MyImage toHide)
         {
             if (hideout == 0)
             {
-                throw new Exception("No channel selected");
+                throw new NoChannelException("No channel selected");
             }
 
             if (toHide.width > width || toHide.height > height)
