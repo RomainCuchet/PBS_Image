@@ -44,6 +44,8 @@ namespace PBS_Image
 
         public static bool operator ==(Pixel p1, Pixel p2)
         {
+            if(p1 is null || p2 is null)
+                return p1 is null && p2 is null;
             return p1.red == p2.red && p1.green == p2.green && p1.blue == p2.blue;
         }
 
@@ -59,6 +61,16 @@ namespace PBS_Image
 
             Pixel p = (Pixel)obj;
             return (red == p.red) && (green == p.green) && (blue == p.blue);
+        }
+
+        public byte Min()
+        {
+            return Math.Min(Math.Min(red, green), blue);
+        }
+
+        public byte Max()
+        {
+            return Math.Max(Math.Max(red, green), blue);
         }
 
         /// <summary>

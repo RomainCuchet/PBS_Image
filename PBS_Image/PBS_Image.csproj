@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Images\Hide_Stegano\" />
+    <Folder Include="Images\Triple_Hide_Stegano\" />
   </ItemGroup>
 
 </Project>

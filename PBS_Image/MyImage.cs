@@ -93,7 +93,7 @@ namespace PBS_Image
             byte[] data = File.ReadAllBytes(path);
             get_meta(data);
             image = new Pixel[height, width];
-            get_image(data);
+            get_image_basic(data);
         }
 
         public void get_meta(byte[] data)
@@ -121,6 +121,7 @@ namespace PBS_Image
         /// <param name="data">array of bytes</param>
         public void get_image_basic(byte[] data)
         {
+            if(offset != 54) throw new Exception("get_image_basic() only works with offset = 54, consider using get_image() to read them? Some functionalities work with offset unequal to 54 but our code doesn't support it completly and errors occur");
             int i = 0;
             int j = 0;
             if (nb_bits_color == 24) // cas encodage rgb standart
@@ -132,7 +133,6 @@ namespace PBS_Image
                     j++;
                     if (j % width == 0)
                     {
-                        Console.WriteLine(j);
                         i++;
                         j = 0;
                     }
@@ -459,6 +459,19 @@ namespace PBS_Image
                 }
             }
         }
+
+        public (MyImage, MyImage, MyImage) GetTripleHiddenImage(int n=4)
+        {
+            return (GetHiddenImage(n, 0b001), GetHiddenImage(n, 0b010), GetHiddenImage(n, 0b100));
+        }
+
+        public void HideTripleImage(MyImage red, MyImage green, MyImage blue,int n=4)
+        {
+            HideImage(toHide:red, hideout: 0b001,n:n);
+            HideImage(toHide:green,hideout: 0b010,n:n);
+            HideImage(toHide:blue,hideout:0b100,n:n);
+        }
+
         #endregion
     }
 }

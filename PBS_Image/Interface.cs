@@ -16,7 +16,7 @@ namespace PBS_Image
     {
         static string racine = "../../../Images/";
         static string[] filters = ["sharpness", "box blur", "edge1", "edge2", "edge3","embossing", "reflect"];
-        static string[] folders = ["Save/", "ref_stegano/","Default/"];
+        static string[] folders = ["Save/","Default/"];
 
         
         public static string choose_folder(TableSelector folder_selector,Text text)
@@ -66,9 +66,12 @@ namespace PBS_Image
                 "Filter an image",
                 "Rotate an image",
                 "Resize an image",
-                "Generate a fractale",
+                "Mandelbroot fractal",
+                "Julia fractal",
                 "Hide Steganography",
                 "Reveal Steganography",
+                "Triple Hide Steganography",
+                "Triple Reveal Steganography",
                 ]);
             Dialog save_menu = new(new List<string> { "Select a name to save the image"},leftOption:"Make my own",rightOption:$"Save{Tools.get_counter(inc:false)+1}.bmp");
             Text text = new(new List<string>() {""});
@@ -99,6 +102,7 @@ namespace PBS_Image
 
             void SaveImage(MyImage image, string folder = "")
             {
+                save_menu.UpdateRightOption($"Save{Tools.get_counter(inc: false) + 1}.bmp");
                 Window.ActivateElement(save_menu);
                 DialogOption option = save_menu.GetResponse().Value;
                 if (option == DialogOption.Left)
@@ -118,7 +122,6 @@ namespace PBS_Image
                 {
                     if (folder == "") image.save();
                     else image.save(folder: racine + folder);
-                    image.save();
                     text.UpdateLines(new List<string>() { "Succesfully saved the image" });
                     Window.ActivateElement(text);
                     Thread.Sleep(3000);
@@ -128,6 +131,7 @@ namespace PBS_Image
 
             string path = "";
             string stegano_folder = "Hide_Stegano/";
+            string triple_stegano_folder = "Triple_Hide_Stegano/";
             while (true)
             {
                 Window.ActivateElement(title);
@@ -232,6 +236,19 @@ namespace PBS_Image
                             case 5:
                                 Window.DeactivateElement(title);
                                 Window.DeactivateElement(home_menu);
+                                int_selector.UpdateQuestion("Chose the size of the fractale");
+                                int_selector.UpdateMax(4000);
+                                int_selector.UpdateStart(1000);
+                                int_selector.UpdateMin(1000);
+                                int_selector.UpdateStep(100);
+                                Window.ActivateElement(int_selector);
+                                size = int_selector.GetResponse().Value;
+                                Window.DeactivateElement(int_selector);
+                                SaveImage(new Julia(size, size, 0.285, 0.01).create());
+                                break;
+                            case 6:
+                                Window.DeactivateElement(title);
+                                Window.DeactivateElement(home_menu);
                                 text.UpdateLines(new List<string>() { "Select an image to hide" });
                                 Window.ActivateElement(text);
                                 Thread.Sleep(3000);
@@ -252,7 +269,7 @@ namespace PBS_Image
                                 try { image_to_hide_in.HideImage(image_to_hide); }
                                 catch (Exception ex)
                                 {
-                                    text.UpdateLines(new List<string>() { ex.Message });
+                                    text.UpdateLines(new List<string>() { $"ERROR : {ex.Message} "});
                                     Window.ActivateElement(text);
                                     Thread.Sleep(3000);
                                     Window.DeactivateElement(text);
@@ -266,7 +283,7 @@ namespace PBS_Image
                                 SaveImage(image_to_hide_in, stegano_folder);
                                 Window.DeactivateElement(text);
                                 break;
-                            case 6:
+                            case 7:
                                 Window.DeactivateElement(title);
                                 Window.DeactivateElement(home_menu);
                                 text.UpdateLines(new List<string>() { "Select an image to reveal" });
@@ -276,7 +293,78 @@ namespace PBS_Image
                                 hidden = hidden.GetHiddenImage();
                                 SaveImage(hidden);
                                 break;
+                            case 8:
+                                Window.DeactivateElement(title);
+                                Window.DeactivateElement(home_menu);
+                                text.UpdateLines(new List<string>() { "Select the first image to hide" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                image_path = choose_file_folder(file_selector, folder_selector, text);
+                                MyImage image1_to_hide = new MyImage(image_path);
+                                text.UpdateLines(new List<string>() { "Select the second image to hide" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                image_path = choose_file_folder(file_selector, folder_selector, text);
+                                MyImage image2_to_hide = new MyImage(image_path);
+                                text.UpdateLines(new List<string>() { "Select the third image to hide" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                image_path = choose_file_folder(file_selector, folder_selector, text);
+                                MyImage image3_to_hide = new MyImage(image_path);
+                                Window.DeactivateElement(text);
+                                text.UpdateLines(new List<string>() { "Select an image to hide the image in" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
+                                image_to_hide_in = new MyImage(choose_file_folder(file_selector, folder_selector, text));
+                                if (image1_to_hide.width > image_to_hide_in.width || image1_to_hide.height > image_to_hide_in.height ||
+                                    image2_to_hide.width > image_to_hide_in.width || image2_to_hide.height > image_to_hide_in.height ||
+                                    image3_to_hide.width > image_to_hide_in.width || image3_to_hide.height > image_to_hide_in.height)
+                                {
+                                    double maxRatioWidth = Math.Max(Math.Max((double)image1_to_hide.width / image_to_hide_in.width, (double)image2_to_hide.width / image_to_hide_in.width), (double)image3_to_hide.width / image_to_hide_in.width);
+                                    double maxRatioHeight = Math.Max(Math.Max((double)image1_to_hide.height / image_to_hide_in.height, (double)image2_to_hide.height / image_to_hide_in.height), (double)image3_to_hide.height / image_to_hide_in.height);
+                                    double maxRatio = Math.Max(maxRatioWidth, maxRatioHeight);
+                                    maxRatio += 0.1;
+                                    image_to_hide_in = image_to_hide_in.resize(maxRatio);
+                                }
+                                try
+                                {
+                                    image_to_hide_in.HideTripleImage(image1_to_hide,image2_to_hide,image3_to_hide);
+                                    Window.DeactivateElement(text);
+                                    text.UpdateLines(new List<string>() { $"Image will be available in {triple_stegano_folder}" });
+                                    Window.ActivateElement(text);
+                                    Thread.Sleep(3000);
+                                    Window.DeactivateElement(text);
+                                    SaveImage(image_to_hide_in, triple_stegano_folder);
+                                    Window.DeactivateElement(text);
+                                }
+                                catch (Exception ex)
+                                {
+                                    text.UpdateLines(new List<string>() { $"ERROR : {ex.Message} " });
+                                    Window.ActivateElement(text);
+                                    Thread.Sleep(5000);
+                                    Window.DeactivateElement(text);
+                                }
+                                break;
+                            case 9:
+                                Window.DeactivateElement(title);
+                                Window.DeactivateElement(home_menu);
+                                text.UpdateLines(new List<string>() { "Select an image to reveal" });
+                                Window.ActivateElement(text);
+                                image = new MyImage(choose_file(file_selector, text, triple_stegano_folder));
+                                (image1_to_hide,image2_to_hide,image3_to_hide) = image.GetTripleHiddenImage();
+                                SaveImage(image1_to_hide);
+                                SaveImage(image2_to_hide);
+                                SaveImage(image3_to_hide);
+                                break;
                             default:
+                                text.UpdateLines(new List<string>() { "Not implemented yet" });
+                                Window.ActivateElement(text);
+                                Thread.Sleep(3000);
+                                Window.DeactivateElement(text);
                                 break;
                         }
                         break;

@@ -17,6 +17,11 @@ namespace PBS_Image
             this.b= b;
         }
 
+        public double module ()
+        {
+            return Math.Sqrt(a*a+b*b);
+        }
+
         public static Imaginaire operator + (Imaginaire c,Imaginaire c2)
         {
             return new Imaginaire(c.a+c2.a, c.b+c2.b);
@@ -43,9 +48,5 @@ namespace PBS_Image
         {
             return $"{a}+i*{b}";
         }
-        public double module()
-        {
-            return Math.Sqrt(a*a+ b*b);
-        } 
     }
 }

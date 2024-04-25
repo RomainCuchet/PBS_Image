@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace PBS_Image
 {
-    // https://zestedesavoir.com/tutoriels/329/dessiner-la-fractale-de-mandelbrot/
-    internal class Mandelbrot
+    internal class Julia
     {
-        double x1 = -2.1;
-        double x2 = 0.6;
+        // https://zestedesavoir.com/tutoriels/329/dessiner-la-fractale-de-mandelbrot/
+        double x1 = -1;
+        double x2 = 1;
         double y1 = -1.2;
         double y2 = 1.2;
         int nb_iteration;
@@ -21,24 +20,28 @@ namespace PBS_Image
         int height;
         int width;
         Pixel default_p = new Pixel();
-        Pixel default_color_p = new Pixel(255,255,255);
+        Pixel default_color_p = new Pixel(255, 255, 255);
+        double c_real;
+        double c_imaginary;
 
-        public Mandelbrot(int height, int width,int nb_iteration = 50, double treshold = 4)
+        public Julia(int height, int width, double c_real, double c_imaginary, int nb_iteration = 150, double treshold = 4)
         {
-            zoom_y = height / (y2- y1);
+            this.c_real = c_real;
+            this.c_imaginary = c_imaginary;
+            zoom_y = height / (y2 - y1);
             zoom_x = width / (x2 - x1);
             this.height = height;
             this.treshold = treshold;
             if (width % 4 == 0) this.width = width;
             else
             {
-                this.width = width-width%4;
+                this.width = width - width % 4;
             }
-            
+
             this.nb_iteration = nb_iteration;
         }
 
-        public MyImage create(bool color = true,byte c_red = 0,byte c_green = 0, byte c_blue =255)
+        public MyImage create(bool color = true, byte c_red = 0, byte c_green = 0, byte c_blue = 255)
         {
             Pixel color_p = new Pixel(c_red, c_green, c_blue);
             Pixel[,] image = new Pixel[height, width];
@@ -46,18 +49,17 @@ namespace PBS_Image
             {
                 for (int y = 0; y < width; y++)
                 {
-                    Imaginaire c = new Imaginaire(x / zoom_x + x1, y / zoom_y + y1); // translation vers le repère de mandelbrot
-                    Imaginaire z = new Imaginaire();
+                    Imaginaire z = new Imaginaire(x / zoom_x + x1, y / zoom_y + y1); // Translation vers le repère de l'ensemble de Julia
+                    Imaginaire c = new Imaginaire(c_real, c_imaginary);
                     int i = 0;
                     do
                     {
                         z = z * z + c;
                         i++;
-                    }
-                    while (z.module() < treshold && i < nb_iteration);
+                    } while (z.module() < treshold && i < nb_iteration);
                     if (color)
                     {
-                        if (i != nb_iteration) image[x, y] = new Pixel((byte)Math.Clamp(color_p.red * i / nb_iteration, Pixel.min, Pixel.max), (byte)Math.Clamp(color_p.green * i / nb_iteration, Pixel.min, Pixel.max), (byte)Math.Clamp(color_p.blue * i / nb_iteration, Pixel.min, Pixel.max));
+                        if (i != nb_iteration) image[x, y] = new Pixel((byte)Math.Clamp(color_p.red * i / nb_iteration, (byte) Pixel.min, (byte) Pixel.max), (byte)Math.Clamp(color_p.green * i / nb_iteration, (byte) Pixel.min, (byte) Pixel.max), (byte)Math.Clamp(color_p.blue * i / nb_iteration, (byte)Pixel.min, (byte)Pixel.max));
                         else image[x, y] = default_p;
                     }
                     else
@@ -69,6 +71,5 @@ namespace PBS_Image
             }
             return new MyImage(image);
         }
-
     }
 }
