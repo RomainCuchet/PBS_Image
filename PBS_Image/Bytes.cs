@@ -5,6 +5,12 @@ namespace PBS_Image
 
     public static class Bytes
     {
+        /// <summary>
+        /// Returns the maximum value for n bits
+        /// </summary>
+        /// <param name="n">Number of bits that can store value</param>
+        /// <returns>the byte representing the maximum for n bits (string of "1")</returns>
+        /// <exception cref="Exception">If n < 0</exception>
         public static byte GetMaxForNBits(int n)
         {
             if (n < 0)
@@ -27,6 +33,12 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// Reset the n least significant bits of a byte
+        /// </summary>
+        /// <param name="toReset">Byte that needs to be reset</param>
+        /// <param name="n">number of LSBs to reset</param>
+        /// <exception cref="Exception">If n < 0</exception>
         public static void ResetLeastSignificantBits(ref byte toReset, int n)
         {
             if (n < 0)
@@ -39,6 +51,13 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// Gets the n least significant bits of a byte
+        /// </summary>
+        /// <param name="toGet">byte to retrieve from</param>
+        /// <param name="n">number of bits to retrieve</param>
+        /// <returns>the N least significant bits</returns>
+        /// <exception cref="Exception">If n < 0</exception>
         public static byte GetLeastSignificantBits(byte toGet, int n)
         {
             if (n < 0)
@@ -52,6 +71,13 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// Sets the n least significant bits of a byte
+        /// </summary>
+        /// <param name="toSet">byte that will me modified</param>
+        /// <param name="val">new LSB values</param>
+        /// <param name="n">Number of bits that will be modified</param>
+        /// <exception cref="Exception">If n < 0</exception>
         public static void SetLeastSignificantBits(ref byte toSet, byte val, int n)
         {
             if (n < 0)
@@ -65,25 +91,14 @@ namespace PBS_Image
 
             }
         }
-        /*public static byte CompressBits(byte toCompress, int n)
-        {
-            if (n < 0)
-                throw new ForbiddenValueException();
-            else
-            {
-                if (n == 0)
-                    return 0;
-                byte max = GetMaxForNBits(n) ;
-                if (max <= toCompress)
-                    return toCompress;
-                else
-                {
-                    byte val = (byte)((toCompress * max) / 255);
-                    return val;
-                }
-            }
-        }*/
 
+        /// <summary>
+        /// Compress a byte of 8 bits into a byte of n bits
+        /// </summary>
+        /// <param name="toCompress">Byte that needs compressing</param>
+        /// <param name="n">number of bits on which the byte will be compressed</param>
+        /// <returns>A n bits byte that has been compressed </returns>
+        /// <exception cref="Exception">If n < 0</exception>
         public static byte CompressBits(byte toCompress, int n)
         {
             if (n < 0)
@@ -97,19 +112,14 @@ namespace PBS_Image
             return (byte)compressedValue;
         }
 
-        /*public static byte DecompressBits(byte toDecompress, int n)
-        {
 
-            if (n <= 0)
-                throw new ForbiddenValueException();
-            else
-            {
-                byte max = GetMaxForNBits(n);
-                byte val = (byte)((toDecompress * 255) / max);
-                return val;
-            }
-        }*/
-
+        /// <summary>
+        /// Decompress a byte of n bits into a byte of 8 bits
+        /// </summary>
+        /// <param name="toDecompress">n bits byte that has to be decompressed</param>
+        /// <param name="n">size of toDecompress</param>
+        /// <returns>an 8 bits byte</returns>
+        /// <exception cref="Exception">If n < 0</exception>
         public static byte DecompressBits(byte toDecompress, int n)
         {
             if (n <= 0)

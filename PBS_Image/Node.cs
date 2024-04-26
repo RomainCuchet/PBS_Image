@@ -10,12 +10,12 @@ namespace PBS_Image
         public int Frequency { get; set; }
 
         /// <summary>
-        /// Crée un noeud à partir d'un pixel et d'une fréquence, éventuellement avec des enfants
+        /// Create a node with a pixel and a frequency, and two potential children
         /// </summary>
-        /// <param name="pixel"></param>
-        /// <param name="frequency"></param>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
+        /// <param name="pixel">Pixel value</param>
+        /// <param name="frequency">Frequency at which the specified Pixel appears in the image</param>
+        /// <param name="left">Left child</param>
+        /// <param name="right">Right child</param>
         public Node(Pixel pixel, int frequency, Node left = null, Node right = null)
         {
             Pixel = pixel;
@@ -25,7 +25,7 @@ namespace PBS_Image
         }
 
         /// <summary>
-        /// Crée un noeud à partir de deux enfants et d'un pixel éventuellement 
+        /// Creates a node with two children and a potential pixel
         /// </summary>
         /// <param name="left"></param>
         /// <param name="right"></param>
@@ -38,6 +38,10 @@ namespace PBS_Image
             Pixel = pixel;
         }
 
+        /// <summary>
+        /// Check if the node is a leaf
+        /// </summary>
+        /// <returns>True if the current Node has no childrer</returns>
         public bool IsLeaf()
         {
             return Left == null && Right == null;

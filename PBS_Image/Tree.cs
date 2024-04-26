@@ -3,7 +3,6 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace PBS_Image
 {
-    //création d'un arbre huffman
     public class Tree
     {
         #region Paramètres
@@ -23,7 +22,7 @@ namespace PBS_Image
 
         #region Constructeurs
         /// <summary>
-        /// Reconstruit un arbre de Huffman à partir d'une table de codage
+        /// Rebuild a Huffman tree from an encoding table
         /// </summary>
         /// <param name="encodingTable"></param>
         /// <exception cref="NotImplementedException"></exception>
@@ -41,10 +40,10 @@ namespace PBS_Image
 
         #region Construction de l'arbre
         /// <summary>
-        /// Construit un dictionnaire de fréquences à partir d'une matrice de pixels
+        /// Builds a frequency dictionary from a pixel matrix
         /// </summary>
-        /// <param name="pixelMatrix"></param>
-        /// <returns>Un dictionnaire trié par fréquence de pixel</returns>
+        /// <param name="pixelMatrix">Input Pixel matrix</param>
+        /// <returns>A dictionnary with key being the pixel, and value being its occurences number</returns>
         public static Dictionary<Pixel, int> BuildFrequencyDictionary(Pixel[,] pixelMatrix)
         {
             Dictionary<Pixel, int> Frequencies = new Dictionary<Pixel, int>();
@@ -72,10 +71,10 @@ namespace PBS_Image
 
 
         /// <summary>
-        /// Construit un arbre de Huffman à partir d'un dictionnaire de fréquences
+        /// Build a huffman tree
         /// </summary>
-        /// <param name="frequencies"></param>
-        /// <returns>retourne la racine de l'arbre</returns>
+        /// <param name="frequencies">frequency dictionnary to build the tree from</param>
+        /// <returns>returns the root of a huffman tree</returns>
         public static Node BuildTree(Dictionary<Pixel, int> frequencies)
         {
 
@@ -104,14 +103,14 @@ namespace PBS_Image
         }
 
         /// <summary>
-        /// Construit la table de codage à partir de l'arbre de Huffman
+        /// Build an encoding table from a Huffman tree
         /// </summary>
-        /// <param name="root">Arbre de Huffman actuel</param>
-        /// <param name="code">chemin parcouru encodé en binaire: "0"= Fgauche, "1"= Fdroit</param>
-        /// <param name="codes">table de codage, à initialiser avant</param>
-        /// <returns></returns>
+        /// <param name="root">Current root of the huffman tree</param>
+        /// <param name="code">binary encoded path traversed: "0"= left child, "1"= right child</param>
+        /// <param name="codes">Encoding table that needs to be initialised</param>
+        /// <returns>A Dictionnary with each key being a pixel, and each value being its new string representation</returns>
 
-        public Dictionary<Pixel, string> BuildEncodingTable(Node root, string code, Dictionary<Pixel, string> codes)
+        public Dictionary<Pixel, string> BuildEncodingTable(Node root, string code, Dictionary<Pixel, string> codes) //signature to rework
         {
             if (root.IsLeaf())
             {
@@ -129,11 +128,11 @@ namespace PBS_Image
 
         #region Encodage et décodage
         /// <summary>
-        /// Encode une matrice de pixels en une chaine de bits suivant la table de codage prédéfinie
+        /// Translate a matrix of pixels into a string of bits, with the help of the encoding translation
         /// </summary>
-        /// <param name="pixelMatrix"></param>
-        /// <param name="codes"></param>
-        /// <returns></returns>
+        /// <param name="pixelMatrix">Pixel matrix to be compressed</param>
+        /// <param name="codes">Encoding table for the specified pixel matrix</param>
+        /// <returns>A bit string representing the new compressed image</returns>
         public string Encode(Pixel[,] pixelMatrix, Dictionary<Pixel, string> codes)
         {
             string encoded = "";
@@ -151,11 +150,12 @@ namespace PBS_Image
         }
 
         /// <summary>
-        /// Décode une chaine de bits en une matrice de pixels suivant l'arbre de Huffman fourni
+        /// Decompress a string of bits into a matrix of pixels, with the help of the Huffman tree  
         /// </summary>
-        /// <param name="encoded"></param>
-        /// <param name="root"></param>
-        /// <returns></returns>
+        /// <param name="encoded">bit string that represents an image</param>
+        /// <param name="width">width of the image to recompose, accessible through the header</param>
+        /// <param name="height">height of the image to recompose, accessible through the header</param>
+        /// <returns>The reconstructed matrix of pixel, usable by any codec</returns>
         public Pixel[,] Decode(string encoded, int width, int height)
         {
             Pixel[,] decoded = new Pixel[width, height];//modif ça c'est pas bon (on espère qu'on stocke la taille qq part, snn c la merde)
@@ -192,11 +192,12 @@ namespace PBS_Image
         #endregion
 
         #region Sauvegarde et chargement
+
         /// <summary>
-        /// Sauvegarde la table de codage dans un fichier pour éviter une utilisation trop intensive de la mémoire (256^3 valeurs enregistrées en mémoire)
+        /// Save the encoding table to a file in order to be able to retrieve an image later
         /// </summary>
-        /// <param name="codes"></param>
-        /// <param name="path"></param>
+        /// <param name="codes">Encoding table</param>
+        /// <param name="path">Path to the txt to save</param>
         /// <exception cref="NotImplementedException"></exception>
         public void SaveEncodingTable(Dictionary<Pixel, string> codes, string path)
         {
@@ -204,12 +205,12 @@ namespace PBS_Image
         }
 
         /// <summary>
-        /// Returns a string representation of the Huffman tree
+        /// Returns a high-level string representation of the Huffman tree
         /// </summary>
         /// <param name="root">The root of the Huffman tree</param>
         /// <param name="path">The path to the current node</param>
         /// <returns>A string representation of the Huffman tree</returns>
-        public static string TreeToString(Node root, string path = "")
+        public static string TreeToString(Node root, string path = "") //pk static ?
         {
             if (root == null)
             {
@@ -231,7 +232,9 @@ namespace PBS_Image
 
         #endregion
     
-    #region JPEG DHT Header
+    #region JPEG DHT Header 
+    // this does not work, I wanna kill myself
+
     /// <summary>
     /// Structures the DHT (Define Huffman Table) header for a JPEG image from a Huffman tree
     /// </summary>

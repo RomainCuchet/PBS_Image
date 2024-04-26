@@ -8,7 +8,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
-     public class MyImage
+    public class MyImage
     {
         #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
@@ -122,14 +122,14 @@ namespace PBS_Image
             nb_color = Tools.BytesToInt(Tools.get_bytes_from(data, 46, 49)); ;
             nb_color_imp = Tools.BytesToInt(Tools.get_bytes_from(data, 50, 53));
         }
-        
+
         /// <summary>
         /// get a pixel matrix to represent the image, only works without palette and without remplissage when nb_bits_image = height*width*3
         /// </summary>
         /// <param name="data">array of bytes</param>
         public void get_image_basic(byte[] data)
         {
-            if(offset != 54) throw new Exception("get_image_basic() only works with offset = 54, consider using get_image() to read them? Some functionalities work with offset unequal to 54 but our code doesn't support it completly and errors occur");
+            if (offset != 54) throw new Exception("get_image_basic() only works with offset = 54, consider using get_image() to read them? Some functionalities work with offset unequal to 54 but our code doesn't support it completly and errors occur");
             int i = 0;
             int j = 0;
             if (nb_bits_color == 24) // cas encodage rgb standart
@@ -345,8 +345,9 @@ namespace PBS_Image
 
 
         #region stegano
+
         /// <summary>
-        /// Enumération des channels sur lesquels on peut cacher une image, permet une meilleure lisibilité si besoin
+        /// Improve code readability by associating a byte to a channel
         /// </summary>
         public enum Hideout
         {
@@ -360,11 +361,11 @@ namespace PBS_Image
         /// <summary>
         /// Get the hidden image from the current image
         /// </summary>
-        /// <param name="n">Nombres de bits sur lesquels l'image a été encodée</param>
-        /// <param name="hideout">Channels sur lesquels l'image a été encodée</param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public MyImage GetHiddenImage(int n=4, byte hideout=0b111)
+        /// <param name="n">Number of bits on which the image has been encoded</param>
+        /// <param name="hideout">Color channels on which the image has been encoded</param>
+        /// <returns>a MyImage containing the retireved image from the carrier image</returns>
+        /// <exception cref="NoChannelException">In the unlikely event that no channel has been selected</exception>
+        public MyImage GetHiddenImage(int n = 4, byte hideout = (byte)Hideout.All)
         {
             byte lsb = Bytes.GetLeastSignificantBits(hideout, 3);
 
@@ -373,7 +374,7 @@ namespace PBS_Image
             bool blue = (Bytes.GetLeastSignificantBits(((byte)(lsb >> 2)), 1) == 1);
 
             if (!red && !blue && !green)
-                throw new Exception("No channel selected");
+                throw new NoChannelException("No channel selected");
             else
             {
                 Pixel[,] newImage = new Pixel[height, width];
@@ -406,13 +407,13 @@ namespace PBS_Image
         /// <summary>
         /// Hide an image in another image
         /// </summary>
-        /// <param name="n">nombre de bits dans lesquels l'image sera encodée</param>
-        /// <param name="hideout">sélection des channels de cache: se réferer à Hideout pour savoir comment s'en servir</param>
-        /// <param name="toHide">image à cacher</param>
-        /// <exception cref="NoChannelException">Si aucun channel pour cacher n'est sélectionné</exception>
-        /// <exception cref="SizeException">Si l'image à cacher est plus grande que l'image de support</exception>
+        /// <param name="n">Number of bits per pixel channel that will be used to encode the hidden image</param>
+        /// <param name="hideout">Color channels on which to encode the image</param>
+        /// <param name="toHide">Image that will be hidden in the carrier image</param>
+        /// <exception cref="NoChannelException">In the unlikely event that no color channel has been selected</exception>
+        /// <exception cref="SizeException">Prevent hiding bigger toHide in smaller carrier MyImage</exception>
 
-        public void HideImage(MyImage toHide,int n =4,byte hideout = 0b111)
+        public void HideImage(MyImage toHide, int n = 4, byte hideout = (byte)Hideout.All)
         {
             if (hideout == 0)
             {
@@ -434,13 +435,13 @@ namespace PBS_Image
 
                     if (j >= randomX && j < randomX + toHide.width && i >= randomY && i < randomY + toHide.height)
                     {
-                        toHidePixels = (toHide.image[i-randomY, j-randomX].red, toHide.image[i-randomY, j-randomX].green, toHide.image[i-randomY, j-randomX].blue);
+                        toHidePixels = (toHide.image[i - randomY, j - randomX].red, toHide.image[i - randomY, j - randomX].green, toHide.image[i - randomY, j - randomX].blue);
                     }
                     else
                     {
-                        toHidePixels = ((byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255), (byte) new Random().Next(0, 255));
+                        toHidePixels = ((byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255));
                     }
-                    
+
                     Pixel myPixel = new Pixel(image[i, j].red, image[i, j].green, image[i, j].blue);
 
                     byte compressed;
@@ -468,16 +469,28 @@ namespace PBS_Image
             }
         }
 
-        public (MyImage, MyImage, MyImage) GetTripleHiddenImage(int n=4)
+        /// <summary>
+        /// Fetch a hidden image per color channel of the carrier image
+        /// </summary>
+        /// <param name="n">Number of bits used to encode the hidden images</param>
+        /// <returns>A triple MyImage, the one read from the red channel, then the green one, then the blue</returns>
+        public (MyImage, MyImage, MyImage) GetTripleHiddenImage(int n = 4)
         {
-            return (GetHiddenImage(n, 0b001), GetHiddenImage(n, 0b010), GetHiddenImage(n, 0b100));
+            return (GetHiddenImage(n, (byte)Hideout.Red), GetHiddenImage(n, (byte)Hideout.Green), GetHiddenImage(n, (byte)Hideout.Blue));
         }
 
-        public void HideTripleImage(MyImage red, MyImage green, MyImage blue,int n=4)
+        /// <summary>
+        /// Hide a triple image in the carrier image
+        /// </summary>
+        /// <param name="red">image to hide in the red channel</param>
+        /// <param name="green">image to hide in the green channel</param>
+        /// <param name="blue">image to hide in the blue channel</param>
+        /// <param name="n">Number of bits per color channel to use for encoding</param>
+        public void HideTripleImage(MyImage red, MyImage green, MyImage blue, int n = 4)
         {
-            HideImage(toHide:red, hideout: 0b001,n:n);
-            HideImage(toHide:green,hideout: 0b010,n:n);
-            HideImage(toHide:blue,hideout:0b100,n:n);
+            HideImage(toHide: red, hideout: (byte)Hideout.Red, n: n);
+            HideImage(toHide: green, hideout: (byte)Hideout.Green, n: n);
+            HideImage(toHide: blue, hideout: (byte)Hideout.Blue, n: n);
         }
 
         #endregion
