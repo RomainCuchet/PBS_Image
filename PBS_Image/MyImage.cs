@@ -87,7 +87,10 @@ namespace PBS_Image
             height = this.image.GetLength(0);
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MyImage"/> class with the specified image data.
+        /// </summary>
+        /// <param name="image">The pixel array representing the image.</param>
         public MyImage(string path)
         {
             byte[] data = File.ReadAllBytes(path);
@@ -96,6 +99,10 @@ namespace PBS_Image
             get_image_basic(data);
         }
 
+        /// <summary>
+        /// Retrieves the metadata from the given byte array.
+        /// </summary>
+        /// <param name="data">The byte array containing the image data.</param>
         public void get_meta(byte[] data)
         {
             // les 14 premies bytes constituent l'entête
@@ -115,8 +122,9 @@ namespace PBS_Image
             nb_color = Tools.BytesToInt(Tools.get_bytes_from(data, 46, 49)); ;
             nb_color_imp = Tools.BytesToInt(Tools.get_bytes_from(data, 50, 53));
         }
+        
         /// <summary>
-        /// get a pixel matrix to represent the image, only works without palette and remplissage when nb_bits_image = height*width*3
+        /// get a pixel matrix to represent the image, only works without palette and without remplissage when nb_bits_image = height*width*3
         /// </summary>
         /// <param name="data">array of bytes</param>
         public void get_image_basic(byte[] data)

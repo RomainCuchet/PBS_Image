@@ -15,6 +15,8 @@ namespace PBS_Image
         {
             
             Interface.Home();
+            //Demo.demo_huffman();
+            //Demo.demo_conversion_jpeg();
         }
     }
 }

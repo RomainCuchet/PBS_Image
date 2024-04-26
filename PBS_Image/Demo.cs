@@ -1,4 +1,5 @@
-﻿using PBS_Image;
+﻿using PBS_image;
+using PBS_Image;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,19 +9,19 @@ using System.Threading.Tasks;
 
 
 namespace PBS_Image
-{/*
+{
     internal class Demo
     {
         public static void demoTD_34()
         {
             MyImage image = new MyImage("ref_statue.bmp");
-            image.rotate(15, true).resize(1.3).Save();
-            image.filter("edge1").Save();
+            image.rotate(15, true).resize(1.3).save();
+            image.filter("edge1").save();
         }
 
         public static void mandelbrot()
         {
-            new Mandelbrot(2000, 2000).create().Save();
+            new Mandelbrot(2000, 2000).create().save();
         }
 
         /// <summary>
@@ -35,17 +36,17 @@ namespace PBS_Image
             MyImage carrier = new MyImage(carrierImage);
             carrier = carrier.resize(scale);
 
-            carrier.HideImage(4, 0b111, toHide);
-            carrier.Save();
+            carrier.HideImage(toHide);
+            carrier.save();
 
-            MyImage hidden = carrier.GetHiddenImage(4, 0b111);
-            hidden.Save();
+            MyImage hidden = carrier.GetHiddenImage();
+            hidden.save();
 
         }
 
         public static void demo_huffman()
         {
-            MyImage myimage = new MyImage("Test.bmp");
+            MyImage myimage = new("../../../Images/Default/Test.bmp");
             var freq = Tree.BuildFrequencyDictionary(myimage.image);
             Node root = Tree.BuildTree(freq);
             Tree tree = new Tree(root, freq);
@@ -58,12 +59,12 @@ namespace PBS_Image
             Console.WriteLine($"Header:\n{Tree.StructureDHTHeader(tree.Root).ToString()}");
 
             myimage.image = tree.Decode(encoded, myimage.width, myimage.height);
-            myimage.Save();
+            myimage.save(file_name:"huffman",random_name: false);
         }
 
-        public static void demo_conversion_jpeg(MyImage mi) //On ne sait pas si le résultat est viable parceque pas réussi sauvegarde JPEG.
+        public static void demo_conversion_jpeg() //On ne sait pas si le résultat est viable parceque pas réussi sauvegarde JPEG.
         {
-            Conversion_JPEG jj = new Conversion_JPEG(mi);
+            Conversion_JPEG jj = new Conversion_JPEG(new MyImage("../../../Images/Default/coco.bmp"));
             int cpt = 0;
             for (int i = 0; i < jj.data_height; i++)
             {
@@ -82,5 +83,4 @@ namespace PBS_Image
             Console.WriteLine(cpt); //Montre le nombre de pixels parcourus
         }
     }
-    */
 }

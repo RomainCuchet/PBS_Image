@@ -9,9 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
+/// <summary>
+/// Contains classes and methods for image modification.
+/// </summary>
 namespace PBS_Image
 {
     internal class Modification
+
     {
         /// <summary>
         /// rotation with the basic angles 90,180,270
@@ -76,17 +80,14 @@ namespace PBS_Image
         }
 
         /// <summary>
-        /// resize the image with the given factor
+        /// Resizes the given image by the specified factor.
         /// </summary>
-        /// <param name="myimage">Myimage instance to extend</param>
-        /// <param name="factor">extend's factor</param>
-        /// <returns></returns>
+        /// <param name="myimage">The image to resize.</param>
+        /// <param name="factor">The resizing factor. Must be >0</param>
+        /// <returns>The resized image.</returns>
         public static MyImage resize(MyImage myimage, double factor = 2)
         {
 
-
-
-            
             if (factor <= 0)
             {
                 Console.WriteLine("tried to resize an image with a negative or null factor");
@@ -107,6 +108,16 @@ namespace PBS_Image
             }
             return extendedImage;
         }
+
+        
+        /// <summary>
+        /// Rotates the given image by the specified angle.
+        /// </summary>
+        /// <param name="image">The image to rotate.</param>
+        /// <param name="angle">The rotation angle in degrees.</param>
+        /// <param name="interpo">Specifies whether to use interpolation for pixel values.</param>
+        /// <param name="optimal_dim">Specifies whether to calculate optimal dimensions for the rotated image.</param>
+        /// <returns>The rotated image.</returns>
         public static MyImage rotate(MyImage image, double angle, bool interpo, bool optimal_dim)
         {
             if (angle == 0 || angle == 90 || angle == 180 || angle == 270) return basic_rotate_image(image, (int)angle);
@@ -127,7 +138,7 @@ namespace PBS_Image
             rotatedImage.image = new Pixel[rotatedImage.height, rotatedImage.width];
 
 
-            // compute offset to center the image in the new matrixg
+            // compute offset to center the image in the new matrix
             int offsetX = (rotatedHeight - image.height) / 2;
             int offsetY = (rotatedWidth - image.width) / 2;
 
@@ -203,7 +214,7 @@ namespace PBS_Image
             double min_i = Math.Min(i1_new, Math.Min(i2_new, Math.Min(i3_new, i4_new)));
             double max_i = Math.Max(i1_new, Math.Max(i2_new, Math.Max(i3_new, i4_new)));
 
-            // get dimensions in byte (un pixel is 3 bytes)
+            // get dimensions in byte (a pixel is 3 bytes)
             int rotatedWidth = ((int)(max_j - min_j));
             int rotatedHeight = ((int)(max_i - min_i));
 
