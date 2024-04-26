@@ -8,7 +8,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace PBS_Image
 {
-    class MyImage
+     public class MyImage
     {
         #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm

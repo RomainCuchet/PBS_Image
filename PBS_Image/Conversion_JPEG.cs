@@ -3,7 +3,7 @@ using System;
 
 namespace PBS_image
 {
-    internal class Conversion_JPEG
+    public class Conversion_JPEG
     {
         public double[,] image_JPEG_Y;
         public double[,] image_JPEG_Cb;
