@@ -1,28 +1,36 @@
 using PBS_Image;
 using System;
 
-namespace PBS_image
+/// <summary>
+/// Contains classes related to the PBS_image functionality.
+/// </summary>
+/// namespace PBS_image
 {
     internal class Conversion_JPEG
     {
+        //image_JPEG variables are used to store the image in YCbCr format
         public double[,] image_JPEG_Y;
         public double[,] image_JPEG_Cb;
         public double[,] image_JPEG_Cr;
+
+        //data_JPEG variables are used to strore the image in martrix of 8x8 blocs
         public double[,][,] data_JPEG_Y;
         public double[,][,] data_JPEG_Cb;
         public double[,][,] data_JPEG_Cr;
-        public Pixel[,] result;
+        public Pixel[,] result; //result of the encoding in Pixel[,] format
+
+        //result of the encoding in byte[,] format
         public byte[,] result_Y;
         public byte[,] result_Cb;
         public byte[,] result_Cr;
-        public int height;
-        public int width;
-        public int data_height;
-        public int data_width;
+        public int height; //height of the image
+        public int width; //width of the image
+        public int data_height; //height of the data_JPEG matrix
+        public int data_width; //width of the data_JPEG matrix
 
         double pi = Math.PI;
 
-        double[,] quant_luminance = new double[,] 
+        double[,] quant_luminance = new double[,] //quantization matrix for luminance
         {
            { 16, 11, 10, 16, 24, 40, 51, 61 },
            { 12, 12, 14, 19, 26, 58, 60, 55 },
@@ -34,7 +42,7 @@ namespace PBS_image
            { 72, 92, 95, 98, 112, 100, 103, 99 } 
         };
 
-        double[,] quant_chrominance = new double[,] 
+        double[,] quant_chrominance = new double[,] //quantization matrix for chrominance
         { 
             { 17,18,24,47,99,99,99,99},
             {18,21,26,66,99,99,99,99},
@@ -46,7 +54,7 @@ namespace PBS_image
             {99,99,99,99,99,99,99,99} 
         };
 
-        int[,] zigzag = new int[,]
+        int[,] zigzag = new int[,] //matrix used for the zigzag encoding
         { 
             {0,1,5,6,14,15,27,28},
             {2,4,7,13,16,26,29,42},
@@ -58,21 +66,14 @@ namespace PBS_image
             {35,36,48,49,57,58,62,63}
         };
 
-        
-
-        public double[,][,] init_data_JPEG(int hauteur, int largeur, int haut_mat, int larg_mat)
-        {
-            double[,][,] ret_JPEG = new double[hauteur, largeur][,];
-            for (int i = 0; i < hauteur; i++)
-            {
-                for (int j = 0; j < largeur; j++)
-                {
-                    ret_JPEG[i, j] = new double[haut_mat, larg_mat];
-                }
-            }
-            return ret_JPEG;
-        }
-
+        /// <summary>
+        /// function to initialize a matrixs of blocs of double
+        /// </summary>
+        /// <param name="hauteur">height of the image</param>
+        /// <param name="largeur">width of the image</param>
+        /// <param name="haut_mat">height of the bloc</param>
+        /// <param name="larg_mat">width of the bloc</param>
+        /// <returns></returns>
         public double[,][,] init_mat_bloc(int hauteur, int largeur, int haut_mat, int larg_mat)
         {
             double[,][,] ret_JPEG = new double[hauteur, largeur][,];
@@ -87,6 +88,12 @@ namespace PBS_image
             return ret_JPEG;
         }
 
+
+        /// <summary>
+        /// Constructor of the class Conversion_JPEG. Initialization of the height, the width and image_JPEG_Y, image_JPEG_Cb, image_JPEG_Cr. 
+        /// Run the different methods for the conversion.
+        /// </summary>
+        /// <param name="mi">image</param>
         public Conversion_JPEG(MyImage mi)
         {
             height = mi.image.GetLength(0);
@@ -96,11 +103,15 @@ namespace PBS_image
             image_JPEG_Cr = new double[height, width];
             Color_Transformation_x_Echantillonage(mi);
             Decoupage();
-            Console.WriteLine("fait");
             DCT();
             codage_zigzag(zigzag);
         }
 
+
+        /// <summary>
+        /// Function to convert the image from RGB to YCbCr and to sample the image in 4:2:0 format.
+        /// </summary>
+        /// <param name="mi">image</param>
         public void Color_Transformation_x_Echantillonage(MyImage mi)
         {
             double[] pixel_y = new double[4];
@@ -192,6 +203,10 @@ namespace PBS_image
             }
         }
 
+
+        /// <summary>
+        /// Function to cut the image into a mtrix of 8x8 blocs
+        /// </summary>
         public void Decoupage()
         {
             if (height % 8 == 0) data_height = height / 8;
@@ -199,26 +214,20 @@ namespace PBS_image
             if (width % 8 == 0) data_width = width / 8;
             else data_width = width / 8 + 1;
 
-            data_JPEG_Y = new double[data_height, data_width][,];
-            data_JPEG_Cb = new double[data_height, data_width][,];
-            data_JPEG_Cr = new double[data_height, data_width][,];
+            data_JPEG_Y = init_mat_bloc(data_height, data_width, 8, 8);
+            data_JPEG_Cb = init_mat_bloc(data_height, data_width, 8, 8);
+            data_JPEG_Cr = init_mat_bloc(data_height, data_width, 8, 8);
 
             for (int i = 0; i < data_height; i++)
             {
                 for (int j = 0; j < data_width; j++)
                 {
-                    data_JPEG_Y[i,j] = new double[8, 8];
-                    data_JPEG_Cb[i, j] = new double[8, 8];
-                    data_JPEG_Cr[i, j] = new double[8, 8];
                     for (int k = 0; k < 8; k = k + 2)
                     {
                         for (int l = 0; l < 8; l = l + 2)
                         {
                             if ((k + i) < height && (j + l) < width)
                             {
-                                data_JPEG_Y[i, j][k, l] = image_JPEG_Y[i+k,j+ l];
-                                data_JPEG_Cb[i, j][k, l] = image_JPEG_Cb[i+k,j+ l];
-                                data_JPEG_Cr[i, j][k, l] = image_JPEG_Cr[i + k, j + l];
                                 if ((k + i) != height - 1)
                                 {
                                     data_JPEG_Y[i, j][k+1, l] = image_JPEG_Y[i + k + 1, j + l];
@@ -274,6 +283,10 @@ namespace PBS_image
             }
         }
 
+
+        /// <summary>
+        /// Function to apply the DCT to the image and to quantize the image with the quantizations matrixes.
+        /// </summary>
         public void DCT()
         {
             double ck;
@@ -322,6 +335,11 @@ namespace PBS_image
             data_JPEG_Cb = res_Cb;
             data_JPEG_Cr = res_Cr;
         }
+
+        /// <summary>
+        /// Function to apply the zigzag coding to the image. The mat_zigag matrix is used to know the order of the coding.
+        /// </summary>
+        /// <param name="mat_zigzag">matrix used for the zigzag encoding</param>
         public void codage_zigzag(int[,] mat_zigzag)
         {
             result = new Pixel[data_height * 8, data_width * 8];
