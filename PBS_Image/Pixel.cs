@@ -31,7 +31,7 @@ namespace PBS_Image
         /// <summary>
         /// Represents a pixel with red, green, and blue color components.
         /// </summary>
-        /// public Pixel(Pixel p) 
+        public Pixel(Pixel p) 
         {
             red = p.red;
             green = p.green;

@@ -1,7 +1,11 @@
 using System;
 using System.Reflection.Metadata.Ecma335;
 
+/// namespace PBS_Image <summary>
 /// namespace PBS_Image
+/// </summary>
+/// 
+namespace PBS_Image
 {
     public class Tree
     {
@@ -228,86 +232,86 @@ using System.Reflection.Metadata.Ecma335;
             return left + right;
         }
 
-        
+
 
         #endregion
-    
-    #region JPEG DHT Header 
-    // this does not work, I wanna kill myself
 
-    /// <summary>
-    /// Structures the DHT (Define Huffman Table) header for a JPEG image from a Huffman tree
-    /// </summary>
-    /// <param name="root">The root of the Huffman tree</param>
-    /// <returns>A byte array representing the DHT header</returns>
-    public static byte[] StructureDHTHeader(Node root)
-    {
-        if (root == null)
+        #region JPEG DHT Header 
+        // this does not work, I wanna kill myself
+
+        /// <summary>
+        /// Structures the DHT (Define Huffman Table) header for a JPEG image from a Huffman tree
+        /// </summary>
+        /// <param name="root">The root of the Huffman tree</param>
+        /// <returns>A byte array representing the DHT header</returns>
+        public static byte[] StructureDHTHeader(Node root)
         {
-            throw new ArgumentNullException(nameof(root));
+            if (root == null)
+            {
+                throw new ArgumentNullException(nameof(root));
+            }
+
+            List<byte> dhtHeader = new List<byte>();
+
+            // Add DHT marker
+            dhtHeader.AddRange(new byte[] { 0xFF, 0xC4 });
+
+            // Placeholder for length, will be filled later
+            dhtHeader.AddRange(new byte[] { 0x00, 0x00 });
+
+            // Add Huffman table information
+            dhtHeader.Add(0x00); // Table class (0 = DC, 1 = AC) and identifier (0-3)
+
+            // Placeholder for number of symbols of lengths 1-16, will be filled later
+            dhtHeader.AddRange(new byte[16]);
+
+            // Placeholder for symbols, will be filled later
+            List<byte> symbols = new List<byte>();
+
+            // Traverse the Huffman tree and fill the symbols and their lengths
+            TraverseTree(root, "", (symbol, length) =>
+            {
+                // Convert symbol to byte and add to symbols list
+                symbols.Add(Convert.ToByte(symbol, 2));
+
+                // Increment the count of symbols of this length
+                dhtHeader[4 + length - 1]++;
+            });
+
+            // Add symbols to DHT header
+            dhtHeader.AddRange(symbols);
+
+            // Fill the length (excluding the marker)
+            int length = dhtHeader.Count - 2;
+            dhtHeader[2] = (byte)(length >> 8);
+            dhtHeader[3] = (byte)(length & 0xFF);
+
+            return dhtHeader.ToArray();
         }
 
-        List<byte> dhtHeader = new List<byte>();
-
-        // Add DHT marker
-        dhtHeader.AddRange(new byte[] { 0xFF, 0xC4 });
-
-        // Placeholder for length, will be filled later
-        dhtHeader.AddRange(new byte[] { 0x00, 0x00 });
-
-        // Add Huffman table information
-        dhtHeader.Add(0x00); // Table class (0 = DC, 1 = AC) and identifier (0-3)
-
-        // Placeholder for number of symbols of lengths 1-16, will be filled later
-        dhtHeader.AddRange(new byte[16]);
-
-        // Placeholder for symbols, will be filled later
-        List<byte> symbols = new List<byte>();
-
-        // Traverse the Huffman tree and fill the symbols and their lengths
-        TraverseTree(root, "", (symbol, length) =>
+        /// <summary>
+        /// Traverses the Huffman tree and executes an action for each leaf node
+        /// </summary>
+        /// <param name="node">The current node</param>
+        /// <param name="path">The path to the current node</param>
+        /// <param name="action">The action to execute for each leaf node</param>
+        private static void TraverseTree(Node node, string path, Action<string, int> action)
         {
-            // Convert symbol to byte and add to symbols list
-            symbols.Add(Convert.ToByte(symbol, 2));
+            if (node == null)
+            {
+                return;
+            }
 
-            // Increment the count of symbols of this length
-            dhtHeader[4 + length - 1]++;
-        });
-
-        // Add symbols to DHT header
-        dhtHeader.AddRange(symbols);
-
-        // Fill the length (excluding the marker)
-        int length = dhtHeader.Count - 2;
-        dhtHeader[2] = (byte)(length >> 8);
-        dhtHeader[3] = (byte)(length & 0xFF);
-
-        return dhtHeader.ToArray();
+            if (node.IsLeaf())
+            {
+                action(path, path.Length);
+            }
+            else
+            {
+                TraverseTree(node.Left, path + "0", action);
+                TraverseTree(node.Right, path + "1", action);
+            }
+        }
+        #endregion
     }
-
-    /// <summary>
-    /// Traverses the Huffman tree and executes an action for each leaf node
-    /// </summary>
-    /// <param name="node">The current node</param>
-    /// <param name="path">The path to the current node</param>
-    /// <param name="action">The action to execute for each leaf node</param>
-    private static void TraverseTree(Node node, string path, Action<string, int> action)
-    {
-        if (node == null)
-        {
-            return;
-        }
-
-        if (node.IsLeaf())
-        {
-            action(path, path.Length);
-        }
-        else
-        {
-            TraverseTree(node.Left, path + "0", action);
-            TraverseTree(node.Right, path + "1", action);
-        }
-    }
-    #endregion
-}
 }
