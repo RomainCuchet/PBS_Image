@@ -23,6 +23,13 @@ namespace PBS_Image
             {"edge3", new double[,] {{-1,-1,-1}, {-1,8,-1} , {-1,-1,-1} } },
         };
 
+        /// <summary>
+        /// this function will apply a filter to an image
+        /// </summary>
+        /// <param name="image">the image</param>
+        /// <param name="filter">a string representing the filter to apply</param>
+        /// <param name="basic">not used</param>
+        /// <returns></returns>
         public static Pixel[,] filter(Pixel[,] image, string filter, bool basic)
         {
 

@@ -460,11 +460,23 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        ///get 3 images hidden into one
+        /// </summary>
+        /// <param name="n">number of bit per channel</param>
+        /// <returns></returns>
         public (MyImage, MyImage, MyImage) GetTripleHiddenImage(int n=4)
         {
             return (GetHiddenImage(n, 0b001), GetHiddenImage(n, 0b010), GetHiddenImage(n, 0b100));
         }
 
+        /// <summary>
+        /// hide 3 images into one, lose the color
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <param name="n"></param>
         public void HideTripleImage(MyImage red, MyImage green, MyImage blue,int n=4)
         {
             HideImage(toHide:red, hideout: 0b001,n:n);

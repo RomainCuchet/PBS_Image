@@ -107,6 +107,15 @@ namespace PBS_Image
             }
             return extendedImage;
         }
+
+        /// <summary>
+        /// rotate the image with the given angle
+        /// </summary>
+        /// <param name="image">the image</param>
+        /// <param name="angle">the angle to rotate in °</param>
+        /// <param name="interpo">wether to use interpo or not</param>
+        /// <param name="optimal_dim">wether to compute the optimal dimension or not</param>
+        /// <returns></returns>
         public static MyImage rotate(MyImage image, double angle, bool interpo, bool optimal_dim)
         {
             if (angle == 0 || angle == 90 || angle == 180 || angle == 270) return basic_rotate_image(image, (int)angle);
@@ -160,6 +169,12 @@ namespace PBS_Image
             return rotatedImage;
         }
 
+        /// <summary>
+        /// this function enables to calculate the optimal dimensions of the rotated image
+        /// </summary>
+        /// <param name="image">the image</param>
+        /// <param name="angle">the rotation angle</param>
+        /// <returns></returns>
         static (int, int) get_optimal_dim(MyImage image, double angle)
         {
             // get corners' coordinates

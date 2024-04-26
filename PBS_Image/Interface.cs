@@ -18,7 +18,12 @@ namespace PBS_Image
         static string[] filters = ["sharpness", "box blur", "edge1", "edge2", "edge3","embossing", "reflect"];
         static string[] folders = ["Save/","Default/"];
 
-        
+        /// <summary>
+        /// chose a folder in the list of folders
+        /// </summary>
+        /// <param name="folder_selector">the interface element</param>
+        /// <param name="text">the text interface element</param>
+        /// <returns></returns>
         public static string choose_folder(TableSelector folder_selector,Text text)
         {
             text.UpdateLines(new List<string>() { "SELECT IMAGE : Select a folder" });
