@@ -8,6 +8,9 @@ namespace PBS_Image
 {
     class Tools
     {
+        /// <summary>
+        /// Just to test headers without creating the image
+        /// </summary>
         public class Header
         {
             #region parameters
@@ -47,6 +50,10 @@ namespace PBS_Image
                 Console.WriteLine(data.Length-offset);
             }
 
+            /// <summary>
+            /// this function will get the metadata of the image
+            /// </summary>
+            /// <param name="data">the bytes of the object</param>
             public void get_meta(byte[] data)
             {
                 this.data = data;
@@ -230,7 +237,12 @@ namespace PBS_Image
             return str;
         }
 
-
+        /// <summary>
+        /// gzt the counter from a file
+        /// </summary>
+        /// <param name="filePath">path to counter file</param>
+        /// <param name="inc">wether to increment counter or not</param>
+        /// <returns></returns>
         public static int get_counter(string filePath = "../../../counter.txt", bool inc = true)
         {
             int value = 0;
@@ -281,7 +293,13 @@ namespace PBS_Image
         }
 
 
-        // Fonction d'interpolation bilinéaire
+        /// <summary>
+        /// bilinear interpolation for better image quality
+        /// </summary>
+        /// <param name="image">the image</param>
+        /// <param name="x">height index</param>
+        /// <param name="y">width index</param>
+        /// <returns></returns>
         public static Pixel interpolation(Pixel[,] image, double x, double y)
         {
             int x1 = (int)Math.Floor(x);
