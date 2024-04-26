@@ -157,7 +157,7 @@ namespace PBS_Image
 
             if (nb_bits_color == 24)
             {
-                int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3;
+                int bytesPerRow = ((width * nb_bits_pixel) + 3) & ~3; // binary and operator with the opposite of 3 (00) to get the next multiple of 4
                 int dataIndex = offset;
 
                 for (int y = 0; y < height; y++)
@@ -171,7 +171,7 @@ namespace PBS_Image
                         j++;
                     }
 
-                    // Aller au début de la prochaine ligne, en sautant les octets de remplissage
+                    // go to the next line by jumping the padding
                     dataIndex += (bytesPerRow - (width * nb_bits_pixel));
                     j = 0;
                     i++;
