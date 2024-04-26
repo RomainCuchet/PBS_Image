@@ -1,7 +1,7 @@
 using System;
 using System.Reflection.Metadata.Ecma335;
 
-namespace PBS_Image
+/// namespace PBS_Image
 {
     public class Tree
     {

@@ -13,7 +13,7 @@ namespace PBS_Image
     {
         static void Main(string[] args)
         {
-            
+            // run the interface
             Interface.Home();
             //Demo.demo_huffman();
             //Demo.demo_conversion_jpeg();

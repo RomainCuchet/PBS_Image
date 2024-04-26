@@ -12,32 +12,31 @@ namespace PBS_Image
     {
         #region parameters
         // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
-        public string type = "BM";    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
-                        BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
-                        BA indique qu'il s'agit d'un Bitmap OS/2.
-                        CI indique qu'il s'agit d'une icone couleur OS/2.
-                        CP indique qu'il s'agit d'un pointeur de couleur OS/2.
-                        IC indique qu'il s'agit d'une icone OS/2.
-                        PT indique qu'il s'agit d'un pointeur OS/2.*/
-        public int taille_fichier; //La taille totale du fichier en octets (codée sur 4 octets)
-        public int id_ap; // Un champ réservé pour le créteur de l'image (sur 4 octets)
-        public int offset; // L'offset de l'image (sur 4 octets), en français décalage, c'est-à-dire l'adresse relative du début des informations concernant l'image par rapport au début du fichier
-        public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
-        public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
-        public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-        public int nb_plans = 1; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-        public int nb_bits_color = 24; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
-        public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
-        public int taille_image; //(sur 4 octets)
-        public int hor_res = 11811; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-        public int vert_res = 11811; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
-        public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
-        public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
-        // la palette est optionelle
-        public int p_blue; // palette blue
-        public int p_green; // palette green
-        public int p_red; // palette red
-        public int p_r; // palette réservé
+        public string type;    /*The signature (2 bytes), indicating that it is a BMP file using both characters.
+                    BM, 424D in hexadecimal, indicates that it is a Windows Bitmap.
+                    BA indicates that it is an OS/2 Bitmap.
+                    CI indicates that this is an OS/2 color icon.
+                    CP indicates that it is an OS/2 color pointer.
+                    IC indicates that this is an OS/2 icon.
+                    PT indicates that this is an OS/2 pointer.*/
+        public int taille_fichier; //The total size of the file in bytes (encoded to 4 bytes)
+        public int id_ap; // A reserved field for the image creator (4 bytes)
+        public int offset; // The offset of the image (4 bytes), i.e. the relative address of the beginning of the information about the image compared to the beginning of the file
+        public int taille_entete; //The size of the image header in bytes (encoded to 4 bytes). The following hexadecimal values are possible depending on the type of BMP format: 28 for Windows 3.1x, 95, NT, ... 0C for OS/2 1.x F0 for OS/2 2.x
+        public int width; // The width of the image (about 4 bytes), i.e. the number of pixels horizontally
+        public int height; //The height of the image (4 bytes), i.e. the number of pixels vertically
+        public int nb_plans; // The number of plans (2 bytes). This value is always 1
+        public int nb_bits_color; //The color encoding depth (over 2 bytes), i.e. the number of bits used to encode the color. This value can be equal to 1, 4, 8, 16, 24, or 32
+        public int comp_format; //The compression method (4 bytes). This value is 0 when the image is not compressed, or 1, 2 or 3 depending on the type of compression used:1 for an 8-bit-per-pixel RLE encoding2 for a 4-bit-per-pixel RLE encoding3 for a bitfield encoding, meaning that the color is encoded by a triple mask represented by the palette
+        public int taille_image; //size of the image (on 4 bytes).
+        public int hor_res; //horizontal resolution (on 4 bytes). It is the number of pixels by meter horizontally
+        public int vert_res; //vertical resolution (on 4 bytes). It is the number of pixels by meter vertically
+        public int nb_color; // number of color on the pallet (on 4 bytes).
+        public int nb_color_imp; //nummber of important colors on the pallet (on 4 bytes). It might be 0 if each color has its importance. pallet is optional                       
+        public int p_blue; // blue pallet
+        public int p_green; // green pallet
+        public int p_red; // red pallet
+        public int p_r; // reserved pallet
         public Pixel[,] image { get; set; }
         #endregion
 
@@ -77,6 +76,10 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// constructor by copy with a new image
+        /// </summary>
+        /// <param name="image">Image</param>
         public MyImage(Pixel[,] image)
         {
             this.image = image;
@@ -91,6 +94,10 @@ namespace PBS_Image
         /// Initializes a new instance of the <see cref="MyImage"/> class with the specified image data.
         /// </summary>
         /// <param name="image">The pixel array representing the image.</param>
+        /// <summary>
+        /// constructor of MyImage by reading a file
+        /// </summary>
+        /// <param name="path">path of the image</param>
         public MyImage(string path)
         {
             byte[] data = File.ReadAllBytes(path);
@@ -149,6 +156,10 @@ namespace PBS_Image
 
         }
 
+        /// <summary>
+        /// write the image in the byte array named data
+        /// </summary>
+        /// <param name="data">byte array representing the image</param>
         public void get_image(byte[] data)
         {
             int i = 0;
@@ -246,6 +257,11 @@ namespace PBS_Image
         #endregion
 
         #region affichage
+
+        /// <summary>
+        /// Convert the image to a string
+        /// </summary>
+        /// <returns></returns>
         public string imageTostring()
         {
             if (image == null) return "vide";
@@ -260,16 +276,26 @@ namespace PBS_Image
             return str;
         }
 
+        /// <summary>
+        /// Display a string
+        /// </summary>
         public void display()
         {
             Console.WriteLine(Tostring());
         }
 
+        /// <summary>
+        /// Display the image
+        /// </summary>
         public void display_image()
         {
             Console.WriteLine(imageTostring());
         }
 
+        /// <summary>
+        /// Convert the header to a string
+        /// </summary>
+        /// <returns></returns>
         public string Tostring()
         {
             string str = $"Image {type}\n" +
@@ -331,11 +357,23 @@ namespace PBS_Image
             return Modification.rotate(this, angle, interpo, optimal_dim);
         }
 
+        /// <summary>
+        /// this function resize the image on a unique dimension
+        /// </summary>
+        /// <param name="factor">height and width will be multiplied by the factor </param>
+        /// <returns></returns>
         public MyImage resize(double factor = 2)
         {
             return Modification.resize(this, factor);
         }
 
+
+        /// <summary>
+        /// trigger the filter function from the Filter class to apply a filter on the image
+        /// </summary>
+        /// <param name="kernel">the matrix used for convolution matrix</param>
+        /// <param name="basic">enables redirecting in filter.filter function</param>
+        /// <returns></returns>
         public MyImage filter(string kernel, bool basic = false)
         {
             MyImage filtered = new MyImage(this);

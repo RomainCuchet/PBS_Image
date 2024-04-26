@@ -12,46 +12,53 @@ namespace PBS_Image
         {
             #region parameters
             // https://web.maths.unsw.edu.au/~lafaye/CCM/video/format-bmp.htm
-            public string type;    /*La signature(sur 2 octets), indiquant qu'il s'agit d'un fichier BMP à l'aide des deux caractères.
-                        BM, 424D en hexadécimal, indique qu'il s'agit d'un Bitmap Windows.
-                        BA indique qu'il s'agit d'un Bitmap OS/2.
-                        CI indique qu'il s'agit d'une icone couleur OS/2.
-                        CP indique qu'il s'agit d'un pointeur de couleur OS/2.
-                        IC indique qu'il s'agit d'une icone OS/2.
-                        PT indique qu'il s'agit d'un pointeur OS/2.*/
-            public int taille_fichier; //La taille totale du fichier en octets (codée sur 4 octets)
-            public int id_ap; // Un champ réservé pour le créteur de l'image (sur 4 octets)
-            public int offset; // L'offset de l'image (sur 4 octets), en français décalage, c'est-à-dire l'adresse relative du début des informations concernant l'image par rapport au début du fichier
-            public int taille_entete; //La taille de l'entête de l'image en octets(codée sur 4 octets). Les valeurs hexadécimales suivantes sont possibles suivant le type de format BMP :28 pour Windows 3.1x, 95, NT, ... 0C pour OS/2 1.x F0 pour OS/2 2.x
-            public int width; // La largeur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels horizontalement
-            public int height; //La hauteur de l'image (sur 4 octets), c'est-à-dire le nombre de pixels verticalemen
-            public int nb_plans; // Le nombre de plans (sur 2 octets). Cette valeur vaut toujours 1
-            public int nb_bits_color; //La profondeur de codage de la couleur(sur 2 octets), c'est-à-dire le nombre de bits utilisés pour coder la couleur. Cette valeur peut-être égale à 1, 4, 8, 16, 24 ou 32
-            public int comp_format; // La méthode de compression (sur 4 octets). Cette valeur vaut 0 lorsque l'image n'est pas compressée, ou bien 1, 2 ou 3 suivant le type de compression utilisé  :1 pour un codage RLE de 8 bits par pixel2 pour un codage RLE de 4 bits par pixel3 pour un codage bitfields, signifiant que la couleur est codé par un triple masque représenté par la palette
-            public int taille_image; //(sur 4 octets)
-            public int hor_res; //La résolution horizontale(sur 4 octets), c'est-à-dire le nombre de pixels par mètre horizontalement
-            public int vert_res; // La résolution verticale (sur 4 octets), c'est-à-dire le nombre de pixels par mètre verticalement
-            public int nb_color; // Le nombre de couleurs de la palette (sur 4 octets)
-            public int nb_color_imp; // Le nombre de couleurs importantes de la palette (sur 4 octets). Ce champ peut être égal à 0 lorsque chaque couleur a son importance.
-                                     // la palette est optionelle
-            public int p_blue; // palette blue
-            public int p_green; // palette green
-            public int p_red; // palette red
-            public int p_r; // palette réservé
+            public string type;    /*The signature (2 bytes), indicating that it is a BMP file using both characters.
+                        BM, 424D in hexadecimal, indicates that it is a Windows Bitmap.
+                        BA indicates that it is an OS/2 Bitmap.
+                        CI indicates that this is an OS/2 color icon.
+                        CP indicates that it is an OS/2 color pointer.
+                        IC indicates that this is an OS/2 icon.
+                        PT indicates that this is an OS/2 pointer.*/
+            public int taille_fichier; //The total size of the file in bytes (encoded to 4 bytes)
+            public int id_ap; // A reserved field for the image creator (4 bytes)
+            public int offset; // The offset of the image (4 bytes), i.e. the relative address of the beginning of the information about the image compared to the beginning of the file
+            public int taille_entete; //The size of the image header in bytes (encoded to 4 bytes). The following hexadecimal values are possible depending on the type of BMP format: 28 for Windows 3.1x, 95, NT, ... 0C for OS/2 1.x F0 for OS/2 2.x
+            public int width; // The width of the image (about 4 bytes), i.e. the number of pixels horizontally
+            public int height; //The height of the image (4 bytes), i.e. the number of pixels vertically
+            public int nb_plans; // The number of plans (2 bytes). This value is always 1
+            public int nb_bits_color; //The color encoding depth (over 2 bytes), i.e. the number of bits used to encode the color. This value can be equal to 1, 4, 8, 16, 24, or 32
+            public int comp_format; //The compression method (4 bytes). This value is 0 when the image is not compressed, or 1, 2 or 3 depending on the type of compression used:1 for an 8-bit-per-pixel RLE encoding2 for a 4-bit-per-pixel RLE encoding3 for a bitfield encoding, meaning that the color is encoded by a triple mask represented by the palette
+            public int taille_image; //size of the image (on 4 bytes).
+            public int hor_res; //horizontal resolution (on 4 bytes). It is the number of pixels by meter horizontally
+            public int vert_res; //vertical resolution (on 4 bytes). It is the number of pixels by meter vertically
+            public int nb_color; // number of color on the pallet (on 4 bytes).
+            public int nb_color_imp; //nummber of important colors on the pallet (on 4 bytes). It might be 0 if each color has its importance. pallet is optional
+                                    
+            public int p_blue; // blue pallet
+            public int p_green; // green pallet
+            public int p_red; // red pallet
+            public int p_r; // reserved pallet
             public byte[] data;
             #endregion
 
+            /// <summary>
+            /// Print the length of the image
+            /// </summary>
             public void test_length_image()
             {
                 Console.WriteLine(data.Length-offset-width*height*3);
                 Console.WriteLine(data.Length-offset);
             }
 
+            /// <summary>
+            /// Get the metadata of the image
+            /// </summary>
+            /// <param name="data">byte array of the image</param> 
             public void get_meta(byte[] data)
             {
                 this.data = data;
-                // les 14 premies bytes constituent l'entête
-                type = "" + Convert.ToChar(data[0]) + Convert.ToChar(data[1]); // obtention du type
+                // 14 first bytes
+                type = "" + Convert.ToChar(data[0]) + Convert.ToChar(data[1]); // gets the type of the image
                 taille_fichier = Tools.BytesToInt(Tools.get_bytes_from(data, 2, 5));
                 id_ap = Tools.BytesToInt(Tools.get_bytes_from(data, 6, 9));
                 offset = Tools.BytesToInt(Tools.get_bytes_from(data, 10, 13));
@@ -75,6 +82,9 @@ namespace PBS_Image
                 }
             }
 
+            /// <summary>
+            /// Display the header of the image
+            /// </summary>
             public void display_Header()
             {
                 string res = "Header\n";
@@ -85,11 +95,22 @@ namespace PBS_Image
                 Console.WriteLine(res+"\n");
             }
 
+
+            /// <summary>
+            /// Constructor of the header
+            /// </summary>
+            /// <param name="file_name">name of the file</param> 
+            /// <param name="folder"> path of the folder</param>
             public Header(string file_name, string folder = "../../../Images/")
             {
                 byte[] data = File.ReadAllBytes(folder + file_name);
                 get_meta(data);
             }
+
+            /// <summary>
+            /// return the header as a string
+            /// </summary>
+            /// <returns></returns>
             public string Tostring()
             {
                 string str = $"Image {type}\n" +
@@ -121,32 +142,41 @@ namespace PBS_Image
             }
 
 
-
+            /// <summary>
+            /// Display the header
+            /// </summary>
             public void display()
             {
                 Console.WriteLine(Tostring());
                 Console.WriteLine();
             }
         }
+
+        /// <summary>
+        /// Print the information of the image
+        /// </summary>
+        /// <param name="file_name">name of the file</param> 
+        /// <param name="folder">path of the folder</param> 
+        /// <param name="p_image">enables the print of the image</param> 
         public static void PrintInfo(string file_name = "Test.bmp", string folder = "../../../Images/", bool p_image = false)
         {
             // http://wxfrantz.free.fr/index.php?p=format-bmp
 
 
             byte[] myfile = File.ReadAllBytes(folder + file_name);
-            //myfile est un vecteur composé d'octets représentant les métadonnées et les données de l'image
+            //myfile is a vector composed of bytes representing the metadata and the data of the image
 
-            //Métadonnées du fichier
+            //metadata of the image
             Console.WriteLine("\n Header \n");
             for (int i = 0; i < 14; i++)
                 Console.Write(myfile[i] + " ");
-            //Métadonnées de l'image
+            //metadata of the image
             Console.WriteLine("\n HEADER INFO \n");
             for (int i = 14; i < 54; i++)
                 Console.Write(myfile[i] + " ");
             if (p_image)
             {
-                //L'image elle-même
+                //Image itself
                 Console.WriteLine("\n IMAGE \n");
                 for (int i = 54; i < myfile.Length; i = i + 60)
                 {
@@ -162,7 +192,14 @@ namespace PBS_Image
             Console.WriteLine();
 
         }
-
+        
+        /// <summary>
+        /// Convert a byte array to an integer 32
+        /// </summary>
+        /// <param name="bytes_taille">length of the array</param> 
+        /// <param name="little_endian">enables conversion in little endian</param> 
+        /// <param name="modulo">specifies the modulo to use</param> 
+        /// <returns></returns>
         public static int BytesToInt(byte[] bytes_taille, bool little_endian = true, int modulo = 256)
         {
             double n = 0;
@@ -182,6 +219,12 @@ namespace PBS_Image
             return Convert.ToInt32(n);
         }
 
+
+        /// <summary>
+        /// Calculte the number of byte needed to represent a long
+        /// </summary>
+        /// <param name="number">long to represent</param> 
+        /// <returns></returns>
         public static int CalculateNumberOfBytes(long number)
         {
             if (number == 0)
@@ -198,11 +241,27 @@ namespace PBS_Image
             return numberOfBytes;
         }
 
+        /// <summary>
+        /// Convert an integer to a byte
+        /// </summary>
+        /// <param name="n">integer to convert</param> 
+        /// <param name="little_endian">enables conversion in little endian</param> 
+        /// <returns></returns>
         public static byte Int32toByte(int n, bool little_endian = true)
         {
             return IntToBytes(n, 4, true, 256)[0];
         }
 
+
+        /// <summary>
+        /// Convert an integer to a byte array
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="numberOfBytes"></param>
+        /// <param name="little_endian">enables conversio in little endian</param> 
+        /// <param name="modulo">specifies the modulo to use</param> 
+        /// <returns></returns>
+        /// <exception cref="OverflowException"></exception>
         public static byte[] IntToBytes(long n, int numberOfBytes = 4, bool little_endian = true, int modulo = 256)
         {
             {
@@ -223,6 +282,12 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// Convert an array to a string 
+        /// </summary>
+        /// <typeparam name="T">the type of the array</typeparam> 
+        /// <param name="array">the array to convert</param> 
+        /// <returns></returns>
         public static string ArrayToString<T>(T[] array)
         {
             string str = "";
@@ -230,14 +295,19 @@ namespace PBS_Image
             return str;
         }
 
-
+        /// <summary>
+        /// Get the counter to build the name of the new file getting save.
+        /// </summary>
+        /// <param name="filePath"></param> 
+        /// <param name="inc">enables the incrementation</param> 
+        /// <returns></returns>
         public static int get_counter(string filePath = "../../../counter.txt", bool inc = true)
         {
             int value = 0;
 
             try
             {
-                // Lire la valeur actuelle du fichier
+                // Read the actual value of the file
                 if (File.Exists(filePath))
                 {
                     string content = File.ReadAllText(filePath);
@@ -245,10 +315,10 @@ namespace PBS_Image
                     {
                         if (inc)
                         {
-                            // Incrémenter la valeur
+                            // incremente the value
                             value++;
 
-                            // Écrire la nouvelle valeur dans le fichier
+                            // Write the new value in the file
                             File.WriteAllText(filePath, value.ToString());
                         }
                     }
@@ -270,6 +340,13 @@ namespace PBS_Image
             return value;
         }
 
+        /// <summary>
+        /// Substring method for byte array
+        /// </summary>
+        /// <param name="bytes">the main array</param> 
+        /// <param name="start">start index</param> 
+        /// <param name="stop">stop index</param> 
+        /// <returns></returns>
         public static byte[] get_bytes_from(byte[] bytes, int start, int stop)
         {
             byte[] res = new byte[stop - start + 1];
@@ -281,7 +358,13 @@ namespace PBS_Image
         }
 
 
-        // Fonction d'interpolation bilinéaire
+        /// <summary>
+        /// method for the bilineary interpolation of the image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="x">x coordonate of the pixel</param> 
+        /// <param name="y">y coordonate of the pixel</param> 
+        /// <returns></returns>
         public static Pixel interpolation(Pixel[,] image, double x, double y)
         {
             int x1 = (int)Math.Floor(x);

@@ -171,6 +171,12 @@ namespace PBS_Image
             return rotatedImage;
         }
 
+        /// <summary>
+        /// Calculates the optimal dimensions of an image after rotation.
+        /// </summary>
+        /// <param name="image">The image to calculate the dimensions for.</param>
+        /// <param name="angle">The angle of rotation in radians.</param>
+        /// <returns>A tuple containing the rotated height and width of the image.</returns>
         static (int, int) get_optimal_dim(MyImage image, double angle)
         {
             // get corners' coordinates

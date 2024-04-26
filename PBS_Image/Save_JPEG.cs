@@ -10,7 +10,7 @@ namespace PBS_Image
     internal class Save_JPEG
     {
         #region Header
-        public struct Header
+        public struct Header //structure of the header
         {
             public byte[] SOI;
             public byte[] APP0;
@@ -20,6 +20,10 @@ namespace PBS_Image
             public byte[] SOS;
         }
 
+        /// <summary>
+        /// Set the Start of Image
+        /// </summary>
+        /// <param name="h"></param>
         public void set_SOI(Header h)
         {
             //intialization
@@ -30,7 +34,10 @@ namespace PBS_Image
             h.SOI[1] = 0xd8;
         }
 
-
+        /// <summary>
+        /// Set the APP0, Application Segment 0
+        /// </summary>
+        /// <param name="h"></param>
         public void set_APP0(Header h)
         {
             //intialization
@@ -73,6 +80,12 @@ namespace PBS_Image
             h.APP0[17] = 0x00;
         }
 
+        /// <summary>
+        /// Set the DQT, quantization tables
+        /// </summary>
+        /// <param name="h"></param>
+        /// <param name="quant_Y"></param>
+        /// <param name="quant_CbCr"></param>
         public void set_DQT(Header h, int[,] quant_Y, int[,] quant_CbCr)
         {
             //intialization
@@ -111,6 +124,12 @@ namespace PBS_Image
             }
         }
 
+        /// <summary>
+        /// Set the SOF0, Start of Frame
+        /// </summary>
+        /// <param name="h"></param>
+        /// <param name="heigth"></param>
+        /// <param name="width"></param>
         public void set_SOF0(Header h, int heigth, int width)
         {
             //intialization
@@ -154,6 +173,10 @@ namespace PBS_Image
             h.SOF0[18] = 0x01;
         }
 
+        /// <summary>
+        /// Set the DHT, Huffman tables
+        /// </summary>
+        /// <param name="h"></param>
         public void set_DHT(Header h)
         {
 
@@ -165,6 +188,10 @@ namespace PBS_Image
 
         }
 
+        /// <summary>
+        /// Set the SOS, Start of Scan
+        /// </summary>
+        /// <param name="h"></param>
         public void set_SOS(Header h)
         {
             //intialization
@@ -210,6 +237,10 @@ namespace PBS_Image
 
         //End of the file
         public byte[] EOI;
+
+        /// <summary>
+        /// Set the End of Image
+        /// </summary>
         public void set_EOI()
         {
             //intialization

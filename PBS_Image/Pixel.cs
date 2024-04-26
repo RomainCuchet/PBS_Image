@@ -14,14 +14,24 @@ namespace PBS_Image
         public byte blue;
         public static int min = 0;
         public static int max = 255;
-        public Pixel(byte red = 0, byte green = 0, byte blue = 0)
+
+        /// <summary>
+        /// Set a pixel with the default value of 0
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        public Pixel(byte red = 0, byte green = 0, byte blue = 0) 
         {
             this.red = red;
             this.green = green;
             this.blue = blue;
         }
 
-        public Pixel(Pixel p)
+        /// <summary>
+        /// Represents a pixel with red, green, and blue color components.
+        /// </summary>
+        /// public Pixel(Pixel p) 
         {
             red = p.red;
             green = p.green;
