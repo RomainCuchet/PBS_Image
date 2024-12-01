@@ -1,38 +1,153 @@
+
 # Projet Scientifique Informatique
+
+Ce projet a été réaliser dans le cadre d'un projet imposer par l'ESILV. Il explore les différentes étapes de manipulation d'images numériques, depuis leur représentation en mémoire jusqu'à des opérations comme la rotation d'images, la stéganographie et la génération de fractales.
+
+  
+
+## Table des Matières
+
+1. [Format Pivot](#conversion-jpeg)
+
+2. [Conversion JPEG](#conversion-jpeg)
+
+3. [Enregistrement JPEG](#enregistrement-jpeg)
+
+4. [Interpolation Bilinéaire](#interpolation-bilinéaire)
+
+5. [Lecture des Images avec Bits de Remplissage](#lecture-des-images-avec-bits-de-remplissages)
+
+6. [Stéganographie](#stéganographie)
+
+  
 
 ## Format Pivot
 
-Nous avons pris la décision de représenter notre image sous la forme d’une matrice de pixels. Ce format permet une manipulation intuitive des données. De plus de nombreux algorithmes de traitement d’image utilisent ce format ce qui facilite notre documentation. Intégrer une classe pixel permet de faciliter l’ensemble des fonctions grâce à des méthodes de classe sur ces dernières. 
+  
+
+Nous représentons les images sous la forme d’une matrice de pixels, un format standard dans le traitement d’images qui permet :
+
+- Une manipulation intuitive des données.
+
+- Une intégration facilitée avec des algorithmes de traitement d'image documentés.
+
+Nous avons intégré une classe Pixel, enrichie de méthodes spécifiques, pour simplifier les manipulations et rendre les fonctions plus modulaires et lisibles.
+
+  
 
 ## Conversion JPEG
 
-Nous avons choisi de créer et de conserver les pixels `YCbCr`via 3 matrices de double. Une pour `Y`, une deuxième pour `Cb` et une troisième pour `Cr`. Nous l’avons fait sous cette forme pour que les calculs et l’intégration avec `Huffman` soient plus simple. 
+  
 
-En effet, utiliser le type `double` permet de mener les calculs avec plus de précision et ainsi de limiter l’erreur. Le calcul réalisé lors de la DCT est obligatoirement en double à cause de `sqrt`(), et de même avec la quantification. Ainsi, il vaut mieux tout réaliser en `double`et à la fin convertir si besoin.
+Pour la conversion au format JPEG, nous utilisons trois matrices distinctes de type double :
 
-Utiliser 3 matrices distinctes permet d’agir avec plus d’agilité sur les 3 composantes `YCbCr` . Cela permet de s’occuper d’une variable puis d’une autre. Aussi, le code gagne en visibilité et est bien plus clair. Enfin, bien que nous n’ayons pas réussi à enregistrer l’image en format `JPEG`, nous pensons qu’il est plus simple d’enregistrer l’image en l’ayant sous forme de 3 matrices différentes plutôt qu’en une matrice de pixels.
+  
+
+- Y (luminosité),
+
+- Cb (chrominance bleue),
+
+- Cr (chrominance rouge).
+
+  
+
+### Justifications :
+
+- Précision accrue : Les calculs nécessaires à la Discrete Cosine Transform (DCT) et la quantification utilisent des opérations en virgule flottante (sqrt, divisions, etc.). Travailler directement en double réduit les erreurs d'arrondi.
+
+- Modularité : Travailler avec trois matrices distinctes améliore la clarté du code et permet de manipuler indépendamment chaque composante du modèle YCbCr.
+
+- Facilité de stockage : Bien que nous n’ayons pas encore réussi à sauvegarder des images directement en format JPEG, ce découpage en matrices distinctes simplifie le processus d’intégration future.
+
+  
 
 source : [JPEG — Wikipédia (wikipedia.org)](https://fr.wikipedia.org/wiki/JPEG) et les pages Wikipédia associées aux étapes.
 
-## Enregistrer JPEG
+  
 
-Pour enregistrer l’image, nous avons choisi d’utiliser une `struct` pour le `header`, composée de tableaux de byte afin de pouvoir l'écrire directement dans le fichier. Chaque tableau de byte représente un segment du header (`SOF0`, `APP0`, `DHT`…). Nous avons créé une série de méthodes `set_...()` pour préparer le header à l’écriture. Nous avons fait de même pour la fin du fichier (`EOI`) qui est représenté par un tableau de byte.
+## Enregistrement JPEG
+
+  
+
+Pour écrire les images au format JPEG, nous utilisons une structure struct dédiée au header, composée de tableaux de bytes pour représenter les différents segments (SOF0, APP0, DHT, etc.).
+
+  
+
+- Méthodes set_...() configurant chaque segment avant l’écriture.
+
+- Gestion simplifiée des données de fin de fichier (EOI) via un tableau de bytes.
+
+- Approche modulaire facilitant les mises à jour ou les extensions futures.
+
+- Compatibilité avec les standards définis par les spécifications JPEG.
+
+  
 
 Source : [https://youtu.be/sb8CQ9knDgI?si=wkZDP_XoRGeK8-Wh](https://youtu.be/sb8CQ9knDgI?si=wkZDP_XoRGeK8-Wh), [https://web.archive.org/web/20120403212223/http://class.ee.iastate.edu/ee528/Reading material/JPEG_File_Format.pdf](https://web.archive.org/web/20120403212223/http://class.ee.iastate.edu/ee528/Reading%20material/JPEG_File_Format.pdf)
 
+  
+
 ## Interpolation bilinéaire
 
-Lors de la rotation chaque pixel de l’image ne correspond pas à un pixel de l’image initiale. Afin d’optimiser le rendu on réalise une interpolation bilinéaire avec les 4 voisins pour obtenir le pixel le plus pertinent possible.
+  
+
+Lors des rotations ou transformations géométriques, chaque pixel transformé ne correspond pas toujours à une position exacte dans l'image d'origine. Pour une qualité optimale, nous implémentons une interpolation bilinéaire, qui calcule la valeur d’un pixel en fonction de ses quatre voisins les plus proches.
+
+  
+
+Cette méthode garantit un rendu visuellement cohérent, réduisant les artefacts liés aux transformations.
+
+  
 
 [https://www.iro.umontreal.ca/~mignotte/IFT6150/Chapitre7_IFT6150.pdf](https://www.iro.umontreal.ca/~mignotte/IFT6150/Chapitre7_IFT6150.pdf)
 
+  
+
 ## Lecture des images avec bits de remplissages
 
- Certaines images bmp on un offset bien supérieur et pour des raisons d’optimisation matériel des bits de remplissage sont ajoutés à l’image. On doit donc les supprimer à la lecture car le nombre de bytes constituant l’image n’est plus égal au nombre de bytes entre l’offset et la fin du fichier. Pris en charge via get_image(). Désactivé par défaut car erreur avec certaines fonction.
+  
+
+Certaines images BMP incluent des bits de remplissage pour des raisons d’alignement matériel. Ces bits, qui augmentent artificiellement la taille du fichier, nécessitent une gestion particulière lors de la lecture d u fait de notre implémentation.
+
+  
+
+La méthode get_image() supprime automatiquement les bits de remplissage, en ajustant la taille des données lues.
+
+  
+
+Option désactivée par défaut : Certaines fonctions génèrent des erreurs avec cette prise en charge active.
+
+  
 
 [https://www.gladir.com/LEXIQUE/FICHIERS/bmp.htm](https://www.gladir.com/LEXIQUE/FICHIERS/bmp.htm)
 
+  
+
 ## Stéganographie
 
-Pour obtenir une meilleure conservation de couleurs lors de l’encodage et décodage de l’image cachée on utilise une simple compression des bytes de l’image à cachée sur un certain nombre de bits. L’implémentation actuelle de le stéganographie nous permet de choisir les chaînes de couleurs et la quantité de bits par chaîne à utiliser pour cacher notre image
-On peut aussi cacher jusqu’à trois images dans une image, en perdant les informations de couleurs
+  
+
+Notre module de stéganographie permet d’encoder et de décoder des images cachées tout en préservant les couleurs de l’image hôte.
+
+  
+
+### Fonctionnalités :
+
+1. Compression des bytes de l’image cachée sur un certain nombre de bits pour limiter les pertes de couleur.
+
+2. Paramétrage flexible :
+
+- Sélection des chaînes de couleur à utiliser (R, G, B).
+
+- Quantité de bits par chaîne configurable.
+
+3. Capacité multicanal : Possibilité de cacher jusqu'à trois images différentes dans une seule image hôte, bien qu'avec une perte d’informations colorimétriques.
+
+## Références
+
+1.  **JPEG** : [Wikipédia — JPEG](https://fr.wikipedia.org/wiki/JPEG)
+2.  **Format JPEG** :
+    -   [Vidéo explicative](https://youtu.be/sb8CQ9knDgI?si=wkZDP_XoRGeK8-Wh)
+    -   [Structure du format JPEG](https://web.archive.org/web/20120403212223/http://class.ee.iastate.edu/ee528/Reading%20material/JPEG_File_Format.pdf)
+3.  **Interpolation bilinéaire** : [Notes de cours](https://www.iro.umontreal.ca/~mignotte/IFT6150/Chapitre7_IFT6150.pdf)
+4.  **Bits de remplissage BMP** : [Documentation Gladir](https://www.gladir.com/LEXIQUE/FICHIERS/bmp.htm)
